@@ -55,36 +55,30 @@ export default function LandingPage() {
 
   // Hero Section
   const HeroSection = () => (
-    <section className="hero-section">
-      <div className="hero-content">
-        <div className="hero-badge">
-          <Star className="w-5 h-5 text-accent-yellow" fill="currentColor" />
-          <span>Rated 4.9/5 by thousands of users</span>
-        </div>
-
-        <h1 className="hero-title">
-          The Smartest Way to Sign & Manage Documents
-        </h1>
-
-        <p className="hero-subtitle">
-          Endorse combines legally-binding e-signatures with powerful AI tools to streamline your entire document workflow. From creation to completion, do it all in one place.
-        </p>
-
-        <div className="hero-actions">
-          <button onClick={() => handleNavigate('signup')} className="btn-primary flex items-center" style={{ padding: '1rem 2rem', fontSize: '1.125rem', gap: '0.5rem' }}>
-            Get Started for Free
-            <ChevronRight className="w-5 h-5" />
-          </button>
-          <button className="btn-secondary" style={{ padding: '1rem 2rem', fontSize: '1.125rem' }}>
-            Watch Demo
-          </button>
-        </div>
-
-        <p className="hero-meta">
-          Free 14-day trial • No credit card required
-        </p>
-      </div>
-    </section>
+      <section className="hero-section">
+          <div className="hero-content">
+              <div className="hero-badge">
+                  <Star className="w-5 h-5 text-accent-yellow" fill="currentColor" />
+                  <span>Rated 4.9/5 by thousands of users</span>
+              </div>
+              <h1 className="hero-title">
+                  The Smartest Way to Sign & Manage Documents
+              </h1>
+              <p className="hero-subtitle">
+                  Endorse combines legally-binding e-signatures with powerful AI tools to streamline your entire document workflow. From creation to completion, do it all in one place.
+              </p>
+              <div className="hero-actions">
+                  <button onClick={() => handleNavigate('signup')} className="btn-primary flex items-center" style={{ padding: '1rem 2rem', fontSize: '1.125rem', gap: '0.5rem' }}>
+                      Get Started for Free
+                      <ChevronRight className="w-5 h-5" />
+                  </button>
+                  <button className="btn-secondary" style={{ padding: '1rem 2rem', fontSize: '1.125rem' }}>
+                      Watch Demo
+                  </button>
+              </div>
+              <p className="hero-meta">Free 14-day trial • No credit card required</p>
+          </div>
+      </section>
   );
 
   // Social Proof Section
@@ -334,7 +328,7 @@ export default function LandingPage() {
                             <h4>Company</h4>
                             <ul>
                                 <li><button onClick={() => handleNavigate('about')} className="footer-link-button">About Us</button></li>
-                                <li><a href="#">Contact</a></li>
+                                <li><button onClick={() => handleNavigate('contact')} className="footer-link-button">Contact</button></li>
                                 <li><a href="#">Careers</a></li>
                             </ul>
                         </div>
@@ -364,9 +358,56 @@ export default function LandingPage() {
         );
     };
 
+  // Black Friday Banner with Countdown
+  const BlackFridayBanner = () => {
+    const calculateTimeLeft = () => {
+      const difference = +new Date('2025-11-28T00:00:00') - +new Date();
+      let timeLeft = {};
+
+      if (difference > 0) {
+        timeLeft = {
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / 1000 / 60) % 60),
+          seconds: Math.floor((difference / 1000) % 60)
+        };
+      }
+      return timeLeft;
+    };
+
+    const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+
+    React.useEffect(() => {
+      const timer = setTimeout(() => {
+        setTimeLeft(calculateTimeLeft());
+      }, 1000);
+      return () => clearTimeout(timer);
+    });
+
+    const timerComponents = Object.keys(timeLeft).map(interval => {
+      if (!timeLeft[interval] && timeLeft[interval] !== 0) {
+        return null;
+      }
+      return (
+        <div key={interval} className="countdown-segment">
+          <span className="countdown-number">{String(timeLeft[interval]).padStart(2, '0')}</span>
+          <span className="countdown-label">{interval}</span>
+        </div>
+      );
+    });
+
+    return (
+      <div className="black-friday-banner">
+        <p className="banner-text"><span>Black Friday Sale!</span> Get 50% off all plans. Ends in:</p>
+        <div className="countdown-timer">{timerComponents.length ? timerComponents : <span>Deal has ended!</span>}</div>
+      </div>
+    );
+  };
+
   // Main Render
   return (
     <div style={{ backgroundColor: 'white' }}>
+      <BlackFridayBanner />
       <Navigation />
       <main>
         <HeroSection />

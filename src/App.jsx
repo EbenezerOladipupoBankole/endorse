@@ -4,6 +4,7 @@ import DocumentEditorPage from './DocumentEditorPage';
 import LandingPage from './LandingPage';
 import AboutPage from './AboutPage';
 import LoginPage from './LoginPage';
+import ContactPage from './ContactPage';
 
 // This is a simple router to switch between pages.
 // In a larger application, you would use a library like React Router.
@@ -38,6 +39,10 @@ function App() {
 
   if (page === 'about') {
     return <AboutPage />;
+  }
+
+  if (page === 'contact') {
+    return <ContactPage />;
   }
 
   // Default to the landing page

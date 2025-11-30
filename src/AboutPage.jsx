@@ -9,9 +9,9 @@ export default function AboutPage() {
 
   const founder = {
     name: "Your Name", // You can change this to your name
-    title: "Founder & Innovator",
+    title: "Ownwer",
     avatar: endorseLogo, // Using your site logo as the avatar
-    story: "This is where your brief story will go. You can talk about your passion for technology, your vision for Endorse, and what drives you to innovate in the digital signature space. Explain the 'why' behind the product and connect with your users on a personal level."
+    story: "Ebenezer Bankole is the Founder and CEO of Endorse. He’s currently (Bsc) in studying Software Development at Brigham Young University–Idaho, where his growing love for programming has pushed him to think bigger and build things that solve real problems. That spirit led to Endorse a fresh, modern e-signature platform designed to make signing and approvals feel simple, quick, and truly stress free for businesses."
   };
 
   const values = [
