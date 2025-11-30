@@ -1,9 +1,28 @@
-import React, { useState } from 'react';
-import { CheckCircle, FileText, Users, Zap, Shield, Clock, ChevronRight, Menu, X, Check, Star, UploadCloud, PenTool, Send, Plus } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { CheckCircle, FileText, Users, Zap, Shield, Clock, ChevronRight, Menu, X, Check, Star, UploadCloud, PenTool, Send, Plus, ArrowUp, MessageSquare } from 'lucide-react';
 import endorseLogo from './assets/endorse.webp'; // Import your logo
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  useEffect(() => {
+    const checkScrollTop = () => {
+      if (!showBackToTop && window.pageYOffset > 400) {
+        setShowBackToTop(true);
+      } else if (showBackToTop && window.pageYOffset <= 400) {
+        setShowBackToTop(false);
+      }
+    };
+
+    window.addEventListener('scroll', checkScrollTop);
+    return () => window.removeEventListener('scroll', checkScrollTop);
+  }, [showBackToTop]);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleNavigate = (page) => {
     window.dispatchEvent(new CustomEvent('navigate', { detail: page }));
@@ -72,7 +91,7 @@ export default function LandingPage() {
                       Get Started for Free
                       <ChevronRight className="w-5 h-5" />
                   </button>
-                  <button className="btn-secondary" style={{ padding: '1rem 2rem', fontSize: '1.125rem' }}>
+                  <button onClick={() => setIsVideoModalOpen(true)} className="btn-secondary" style={{ padding: '1rem 2rem', fontSize: '1.125rem' }}>
                       Watch Demo
                   </button>
               </div>
@@ -141,6 +160,53 @@ export default function LandingPage() {
     );
   };
 
+  // Comparison Section
+  const ComparisonSection = () => {
+    const comparisonData = [
+      { feature: 'Legally Binding E-Signatures', endorse: true, traditional: true },
+      { feature: 'Complete Audit Trail', endorse: true, traditional: true },
+      { feature: 'Custom Branding', endorse: true, traditional: 'add-on' },
+      { feature: 'AI Contract Generation', endorse: true, traditional: false },
+      { feature: 'AI Field Placement', endorse: true, traditional: false },
+      { feature: 'API & Integrations', endorse: 'enterprise', traditional: 'enterprise' },
+    ];
+
+    const renderCheck = (value) => {
+      if (value === true) return <Check className="w-6 h-6 text-emerald-600" />;
+      if (value === false) return <X className="w-6 h-6 text-red-400" />;
+      return <span className="text-xs font-semibold uppercase">{value}</span>;
+    };
+
+    return (
+      <section className="comparison-section">
+        <div className="section-header">
+          <h2 className="section-title">A Smarter Way to Work</h2>
+          <p className="section-subtitle">Endorse goes beyond basic e-signatures, offering intelligent tools that traditional platforms can't match.</p>
+        </div>
+        <div className="comparison-table-container">
+          <table className="comparison-table">
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th className="endorse-col">Endorse (with AI)</th>
+                <th>Traditional E-Sign Tools</th>
+              </tr>
+            </thead>
+            <tbody>
+              {comparisonData.map((item, index) => (
+                <tr key={index}>
+                  <td>{item.feature}</td>
+                  <td className="endorse-col">{renderCheck(item.endorse)}</td>
+                  <td>{renderCheck(item.traditional)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    );
+  };
+
   // How It Works Section
   const HowItWorksSection = () => (
     <section className="how-it-works-section">
@@ -149,19 +215,19 @@ export default function LandingPage() {
         <p className="section-subtitle">Our intuitive platform makes it easy to go from document to signed agreement in minutes.</p>
       </div>
       <div className="how-it-works-grid">
-        <div className="step-card">
+        <div className="step-card" style={{ animationDelay: '0.1s' }}>
           <div className="step-number">1</div>
           <div className="feature-icon"><UploadCloud size={32} /></div>
           <h3 className="step-title">Upload Your Document</h3>
           <p className="text-slate-600">Securely upload any PDF. Our system will process it instantly.</p>
         </div>
-        <div className="step-card">
+        <div className="step-card" style={{ animationDelay: '0.2s' }}>
           <div className="step-number">2</div>
           <div className="feature-icon"><PenTool size={32} /></div>
           <h3 className="step-title">Add Fields & Signers</h3>
           <p className="text-slate-600">Drag and drop signature, text, and date fields. Assign them to signers with one click.</p>
         </div>
-        <div className="step-card">
+        <div className="step-card" style={{ animationDelay: '0.3s' }}>
           <div className="step-number">3</div>
           <div className="feature-icon"><Send size={32} /></div>
           <h3 className="step-title">Send & Track</h3>
@@ -183,51 +249,55 @@ export default function LandingPage() {
 
   // Pricing Section
   const PricingSection = () => {
-    const plans = [
-      {
-        name: "Starter",
-        price: "0",
-        period: "per month",
-        description: "For individuals and personal projects.",
-        features: ["3 documents per month", "Basic signature fields", "Email support", "7-day audit trail"],
-        cta: "Start for Free",
-        popular: false
-      },
-      {
-        name: "Professional",
-        price: "29",
-        period: "per month",
-        description: "For professionals and small teams.",
-        features: ["Unlimited documents", "AI contract generation", "Custom branding", "Priority support", "Team collaboration"],
-        cta: "Start Free Trial",
-        popular: true
-      },
-      {
-        name: "Enterprise",
-        price: "Custom",
-        period: "",
-        description: "For large organizations with custom needs.",
-        features: ["Everything in Pro", "Dedicated account manager", "API access & SSO", "On-premise option"],
-        cta: "Contact Sales",
-        popular: false
-      }
-    ];
+    const [billingCycle, setBillingCycle] = useState('monthly');
+
+    const plans = {
+      monthly: [
+        { name: "Starter", price: "0", period: "/ month", description: "For individuals and personal projects.", features: ["3 documents per month", "Basic signature fields", "Email support", "7-day audit trail"], cta: "Start for Free", popular: false },
+        { name: "Professional", price: "29", period: "/ month", description: "For professionals and small teams.", features: ["Unlimited documents", "AI contract generation", "Custom branding", "Priority support", "Team collaboration"], cta: "Start Free Trial", popular: true },
+        { name: "Enterprise", price: "Custom", period: "", description: "For large organizations with custom needs.", features: ["Everything in Pro", "Dedicated account manager", "API access & SSO", "On-premise option"], cta: "Contact Sales", popular: false }
+      ],
+      yearly: [
+        { name: "Starter", price: "0", period: "/ month", description: "For individuals and personal projects.", features: ["3 documents per month", "Basic signature fields", "Email support", "7-day audit trail"], cta: "Start for Free", popular: false },
+        { name: "Professional", price: "23", period: "/ month", description: "For professionals and small teams.", features: ["Unlimited documents", "AI contract generation", "Custom branding", "Priority support", "Team collaboration"], cta: "Start Free Trial", popular: true },
+        { name: "Enterprise", price: "Custom", period: "", description: "For large organizations with custom needs.", features: ["Everything in Pro, plus...", "Dedicated account manager", "API access & SSO", "On-premise option"], cta: "Contact Sales", popular: false }
+      ]
+    };
 
     return (
       <section id="pricing" className="pricing-section">
         <div className="section-header">
           <h2 className="section-title">Simple, Transparent Pricing</h2>
           <p className="section-subtitle">Choose the plan that's right for you. All paid plans come with a 14-day free trial.</p>
+
+          <div className="pricing-toggle">
+            <button
+              className={billingCycle === 'monthly' ? 'active' : ''}
+              onClick={() => setBillingCycle('monthly')}
+            >
+              Monthly
+            </button>
+            <div className="toggle-switch" onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'yearly' : 'monthly')}>
+              <div className={`toggle-knob ${billingCycle === 'yearly' ? 'active' : ''}`}></div>
+            </div>
+            <button
+              className={billingCycle === 'yearly' ? 'active' : ''}
+              onClick={() => setBillingCycle('yearly')}
+            >
+              Yearly
+            </button>
+            <span className="save-badge">Save 20%</span>
+          </div>
         </div>
         <div className="pricing-grid">
-          {plans.map((plan, idx) => (
+          {plans[billingCycle].map((plan, idx) => (
             <div key={idx} className={`pricing-card ${plan.popular ? 'popular' : ''}`} style={{ position: 'relative' }}>
               {plan.popular && <div className="popular-badge">Most Popular</div>}
               <h3 className="plan-name">{plan.name}</h3>
               <p className="plan-price">
                 {plan.price !== "Custom" && "$"}
                 {plan.price}
-            {plan.period && <span style={{ fontSize: '1rem', fontWeight: 500, color: '#64748b', marginLeft: '0.25rem' }}>/ {plan.period}</span>}
+                {plan.period && <span style={{ fontSize: '1rem', fontWeight: 500, color: '#64748b', marginLeft: '0.25rem' }}>{plan.period}</span>}
               </p>
               <p className="plan-description">{plan.description}</p>
           <button onClick={() => handleNavigate('signup')} className={plan.popular ? 'btn-primary' : 'btn-secondary'} style={{ width: '100%' }}>
@@ -404,6 +474,119 @@ export default function LandingPage() {
     );
   };
 
+  // Video Modal Component
+  const VideoModal = ({ isOpen, onClose }) => {
+    if (!isOpen) return null;
+
+    return (
+      <div className="video-modal-overlay" onClick={onClose}>
+        <div className="video-modal-content" onClick={(e) => e.stopPropagation()}>
+          <button className="video-modal-close" onClick={onClose}>
+            <X size={24} />
+          </button>
+          <div className="video-responsive">
+            {/* Replace with your actual video embed URL */}
+            <iframe
+              width="560"
+              height="315"
+              src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1"
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Back to Top Button
+  const BackToTopButton = () => (
+    <button
+      onClick={scrollToTop}
+      className={`back-to-top-btn ${showBackToTop ? 'visible' : ''}`}
+      aria-label="Go to top"
+      title="Go to top"
+    >
+      <ArrowUp size={24} />
+    </button>
+  );
+
+  // Chatbot Component
+  const Chatbot = () => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [messages, setMessages] = useState([
+      { sender: 'bot', text: "Hi there! I'm the Endorse assistant. How can I help you today?" }
+    ]);
+    const [inputValue, setInputValue] = useState('');
+
+    const getBotResponse = (input) => {
+      const lowerInput = input.toLowerCase();
+      if (lowerInput.includes("pricing") || lowerInput.includes("cost")) {
+        return "We have a free Starter plan! Our paid Professional plan is $29/month, or $23/month if you pay yearly. We also have custom Enterprise plans.";
+      }
+      if (lowerInput.includes("security") || lowerInput.includes("secure")) {
+        return "Security is our top priority! All documents are protected with AES-256 encryption and a complete, tamper-proof audit trail for legal compliance.";
+      }
+      if (lowerInput.includes("ai") || lowerInput.includes("artificial intelligence")) {
+        return "Our AI can help you generate contracts from a simple description and also suggests where to place signature fields to save you time!";
+      }
+      if (lowerInput.includes("legally binding")) {
+        return "Yes, absolutely. Endorse signatures are compliant with eIDAS, ESIGN, and UETA regulations, making them legally binding worldwide.";
+      }
+      return "I'm not sure I understand. You can ask me about pricing, security, AI features, or if our signatures are legally binding.";
+    };
+
+    const handleSendMessage = (e) => {
+      e.preventDefault();
+      if (!inputValue.trim()) return;
+
+      const userMessage = { sender: 'user', text: inputValue };
+      setMessages(prev => [...prev, userMessage]);
+
+      setTimeout(() => {
+        const botResponse = { sender: 'bot', text: getBotResponse(inputValue) };
+        setMessages(prev => [...prev, botResponse]);
+      }, 500);
+
+      setInputValue('');
+    };
+
+    return (
+      <div className="chatbot-container">
+        <div className={`chat-window ${isOpen ? 'open' : ''}`}>
+          <div className="chat-header">
+            <h3>Endorse Assistant</h3>
+            <button onClick={() => setIsOpen(false)}><X size={20} /></button>
+          </div>
+          <div className="chat-messages">
+            {messages.map((msg, index) => (
+              <div key={index} className={`message ${msg.sender}`}>
+                {msg.text}
+              </div>
+            ))}
+          </div>
+          <form className="chat-input-form" onSubmit={handleSendMessage}>
+            <input
+              type="text"
+              className="chat-input"
+              placeholder="Ask a question..."
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+            />
+            <button type="submit" className="chat-send-btn">
+              <Send size={18} />
+            </button>
+          </form>
+        </div>
+        <button className="chatbot-toggle-btn" onClick={() => setIsOpen(!isOpen)}>
+          {isOpen ? <X size={28} /> : <MessageSquare size={28} />}
+        </button>
+      </div>
+    );
+  };
+
   // Main Render
   return (
     <div style={{ backgroundColor: 'white' }}>
@@ -414,11 +597,15 @@ export default function LandingPage() {
         <SocialProof />
         <HowItWorksSection />
         <FeaturesSection />
+        <ComparisonSection />
         <TestimonialSection />
         <PricingSection />
         <FAQSection />
         <FinalCTASection />
         <Footer />
+        <VideoModal isOpen={isVideoModalOpen} onClose={() => setIsVideoModalOpen(false)} />
+        <BackToTopButton />
+        <Chatbot />
       </main>
     </div>
   );

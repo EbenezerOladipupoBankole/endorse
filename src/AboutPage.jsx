@@ -1,6 +1,7 @@
 import React from 'react';
 import { Target, Users, ShieldCheck, HeartHandshake, ArrowLeft } from 'lucide-react';
 import endorseLogo from './assets/endorse.webp';
+// import founderImage from './assets/founder.jpg'; // This line is causing the error, so we'll comment it out for now.
 
 export default function AboutPage() {
   const handleNavigate = (page) => {
@@ -8,10 +9,10 @@ export default function AboutPage() {
   };
 
   const founder = {
-    name: "Your Name", // You can change this to your name
-    title: "Ownwer",
-    avatar: endorseLogo, // Using your site logo as the avatar
-    story: "Ebenezer Bankole is the Founder and CEO of Endorse. He’s currently (Bsc) in studying Software Development at Brigham Young University–Idaho, where his growing love for programming has pushed him to think bigger and build things that solve real problems. That spirit led to Endorse a fresh, modern e-signature platform designed to make signing and approvals feel simple, quick, and truly stress free for businesses."
+    name: "Ebenezer Bankole",
+    title: "Owner",
+    avatar: endorseLogo, // Using the logo as a temporary placeholder to fix the error.
+    story: "Ebenezer Bankole is the Founder and CEO of Endorse. He’s currently studying Software Development (Bsc) at Brigham Young University–Idaho, where his growing love for programming has pushed him to think bigger and build things that solve real problems. That spirit led to Endorse a fresh, modern e-signature platform designed to make signing and approvals feel simple, quick, and truly stress free for businesses."
   };
 
   const values = [
