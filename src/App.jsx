@@ -40,10 +40,6 @@ function App() {
     return <AboutPage />;
   }
 
-  if (page === 'signup') {
-    return <SignUpPage />;
-  }
-
   // Default to the landing page
   return <LandingPage />;
 }

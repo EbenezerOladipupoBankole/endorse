@@ -297,44 +297,72 @@ export default function LandingPage() {
   );
 
   // Footer
-  const Footer = () => (
-    <footer className="landing-footer">
-      <div className="footer-grid">
-        <div className="footer-column" style={{ gridRow: 'span 2' }}>
-          <div className="flex items-center" style={{ marginBottom: '1rem' }}>
-            <img src={endorseLogo} alt="Endorse Logo" className="logo-img" />
-          </div>
-          <p>AI-powered digital signatures for modern teams.</p>
-        </div>
-        <div className="footer-column">
-          <h4>Product</h4>
-          <ul>
-            <li><a href="#features">Features</a></li>
-            <li><a href="#pricing">Pricing</a></li>
-            <li><a href="#">Security</a></li>
-          </ul>
-        </div>
-        <div className="footer-column">
-          <h4>Company</h4>
-          <ul>
-            <li><button onClick={() => handleNavigate('about')} className="font-medium" style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#94a3b8' }}>About Us</button></li>
-            <li><a href="#">Contact</a></li>
-            <li><a href="#">Careers</a></li>
-          </ul>
-        </div>
-        <div className="footer-column">
-          <h4>Legal</h4>
-          <ul>
-            <li><a href="#">Privacy Policy</a></li>
-            <li><a href="#">Terms of Service</a></li>
-          </ul>
-        </div>
-      </div>
-      <div className="footer-bottom">
-        <p>© 2025 Endorse. All rights reserved.</p>
-      </div>
-    </footer>
-  );
+    const Footer = () => {
+        // A simple placeholder for social icons. In a real app, you'd use an icon library.
+        const SocialIcon = ({ children }) => <div className="social-icon">{children}</div>;
+
+        return (
+            <footer className="landing-footer">
+                <div className="footer-content">
+                    <div className="footer-grid">
+                        {/* Column 1: Brand and Social */}
+                        <div className="footer-column brand-column">
+                            <div className="flex items-center" style={{ marginBottom: '1rem' }}>
+                                <img src={endorseLogo} alt="Endorse Logo" className="logo-img" />
+                            </div>
+                            <p>AI-powered digital signatures for modern teams.</p>
+                            <div className="social-links">
+                                <SocialIcon>T</SocialIcon>
+                                <SocialIcon>L</SocialIcon>
+                                <SocialIcon>G</SocialIcon>
+                            </div>
+                        </div>
+
+                        {/* Column 2: Product Links */}
+                        <div className="footer-column">
+                            <h4>Product</h4>
+                            <ul>
+                                <li><a href="#features">Features</a></li>
+                                <li><a href="#pricing">Pricing</a></li>
+                                <li><a href="#">Security</a></li>
+                                <li><a href="#">Integrations</a></li>
+                            </ul>
+                        </div>
+
+                        {/* Column 3: Company Links */}
+                        <div className="footer-column">
+                            <h4>Company</h4>
+                            <ul>
+                                <li><button onClick={() => handleNavigate('about')} className="footer-link-button">About Us</button></li>
+                                <li><a href="#">Contact</a></li>
+                                <li><a href="#">Careers</a></li>
+                            </ul>
+                        </div>
+
+                        {/* Column 4: Newsletter Signup */}
+                        <div className="footer-column newsletter-column">
+                            <h4>Stay Updated</h4>
+                            <p>Get the latest product news and updates.</p>
+                            <div className="newsletter-form">
+                                <input type="email" placeholder="Enter your email" />
+                                <button>
+                                    <Send size={18} />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="footer-bottom">
+                        <p>© 2025 Endorse. All rights reserved.</p>
+                        <div className="footer-legal-links">
+                            <a href="#">Privacy Policy</a>
+                            <a href="#">Terms of Service</a>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        );
+    };
 
   // Main Render
   return (

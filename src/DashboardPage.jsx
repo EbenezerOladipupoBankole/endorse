@@ -120,13 +120,13 @@ export default function DashboardPage() {
   const Sidebar = () => (
     <div className={`sidebar ${
       sidebarOpen ? 'w-64' : 'w-0 -ml-64' // Width is controlled by state
-    }`} style={{'--tw-translate-x': '0', '--tw-translate-y': '0', '--tw-rotate': '0', '--tw-skew-x': '0', '--tw-skew-y': '0', '--tw-scale-x': '1', '--tw-scale-y': '1'}}>
+    }`}>
       <div className="sidebar-content">
-        <div className="flex items-center space-x-2 mb-8">
-          <div className="logo-icon">
-            <CheckCircle className="w-5 h-5 text-white" />
+        <div className="dashboard-logo">
+          <div className="dashboard-logo-icon">
+            <CheckCircle className="w-6 h-6 text-white" />
           </div>
-          <span className="logo-text">Endorse</span>
+          <span className="dashboard-logo-text">Endorse</span>
         </div>
 
         <nav className="space-y-2">
