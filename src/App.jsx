@@ -4,7 +4,7 @@ import DocumentEditorPage from './DocumentEditorPage';
 import LandingPage from './LandingPage';
 import AboutPage from './AboutPage';
 import LoginPage from './LoginPage';
-import SignUpPage from './SignUpPage.jsx';
+import SignUpPage from './Signuppage.jsx';
 
 // This is a simple router to switch between pages.
 // In a larger application, you would use a library like React Router.
