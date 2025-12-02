@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, FileText, Users, Zap, Shield, Clock, ChevronRight, Menu, X, Check, Star, UploadCloud, PenTool, Send, Plus, ArrowUp, MessageSquare } from 'lucide-react';
+import { CheckCircle, FileText, Users, Zap, Shield, Clock, ChevronRight, Menu, X, Check, Star, UploadCloud, PenTool, Send, Plus, ArrowUp, MessageSquare, Twitter, Linkedin, Instagram } from 'lucide-react';
 import endorseLogo from './assets/endorse.webp'; // Import your logo
 
 export default function LandingPage() {
@@ -73,32 +73,109 @@ export default function LandingPage() {
   );
 
   // Hero Section
-  const HeroSection = () => (
+  const HeroSection = () => {
+    const [typedText, setTypedText] = useState('');
+    const words = ["Sign", "Manage", "Automate"];
+
+    useEffect(() => {
+      let wordIndex = 0;
+      let charIndex = 0;
+      let isDeleting = false;
+
+      const type = () => {
+        const currentWord = words[wordIndex];
+        if (isDeleting) {
+          setTypedText(currentWord.substring(0, charIndex--));
+          if (charIndex < 0) {
+            isDeleting = false;
+            wordIndex = (wordIndex + 1) % words.length;
+          }
+        } else {
+          setTypedText(currentWord.substring(0, charIndex++));
+          if (charIndex > currentWord.length) {
+            isDeleting = true;
+            setTimeout(type, 2000); // Pause at end of word
+            return;
+          }
+        }
+      };
+
+      const typingInterval = setInterval(type, isDeleting ? 100 : 150);
+      return () => clearInterval(typingInterval);
+    }, []);
+
+    return (
       <section className="hero-section">
-          <div className="hero-content">
-              <div className="hero-badge">
-                  <Star className="w-5 h-5 text-accent-yellow" fill="currentColor" />
-                  <span>Rated 4.9/5 by thousands of users</span>
-              </div>
-              <h1 className="hero-title">
-                  The Smartest Way to Sign & Manage Documents
-              </h1>
-              <p className="hero-subtitle">
-                  Endorse combines legally-binding e-signatures with powerful AI tools to streamline your entire document workflow. From creation to completion, do it all in one place.
-              </p>
-              <div className="hero-actions">
-                  <button onClick={() => handleNavigate('signup')} className="btn-primary flex items-center" style={{ padding: '1rem 2rem', fontSize: '1.125rem', gap: '0.5rem' }}>
-                      Get Started for Free
-                      <ChevronRight className="w-5 h-5" />
-                  </button>
-                  <button onClick={() => setIsVideoModalOpen(true)} className="btn-secondary" style={{ padding: '1rem 2rem', fontSize: '1.125rem' }}>
-                      Watch Demo
-                  </button>
-              </div>
-              <p className="hero-meta">Free 14-day trial • No credit card required</p>
+      <div className="hero-content">
+        {/* Decorative shapes for visual flair */}
+        <div className="deco-shape shape-1"></div>
+        <div className="deco-shape shape-2"></div>
+        <div className="deco-shape shape-3"></div>
+        <div className="deco-shape shape-4"><Plus size={16} /></div>
+
+        <div className="hero-badge">
+          <Star className="w-5 h-5 text-accent-yellow" fill="currentColor" />
+          <span>Rated 4.9/5 by thousands of users</span>
+        </div>
+        <h1 className="hero-title">
+          The Smartest Way to <span className="typed-text-container">{typedText}<span className="cursor">|</span></span> Documents
+        </h1>
+        <p className="hero-subtitle">
+          Endorse combines legally-binding e-signatures with powerful AI tools to streamline your entire document workflow. From creation to completion, do it all in one place.
+        </p>
+        <div className="hero-actions">
+          <button onClick={() => handleNavigate('signup')} className="btn-primary flex items-center" style={{ padding: '1rem 2rem', fontSize: '1.125rem', gap: '0.5rem' }}>
+            Get Started for Free
+            <ChevronRight className="w-5 h-5" />
+          </button>
+          <button onClick={() => setIsVideoModalOpen(true)} className="btn-secondary" style={{ padding: '1rem 2rem', fontSize: '1.125rem' }}>
+            Watch Demo
+          </button>
+        </div>
+        <p className="hero-meta">Free 14-day trial • No credit card required</p>
+        <div className="hero-trusted-by">
+          <p>Trusted by teams at:</p>
+          <div className="hero-trusted-logos">
+            <img src="https://via.placeholder.com/100x30?text=Innovate" alt="Innovate Inc." />
+            <img src="https://via.placeholder.com/100x30?text=Quantum" alt="Quantum Corp" />
+            <img src="https://via.placeholder.com/100x30?text=Apex" alt="Apex Solutions" />
+            <img src="https://via.placeholder.com/100x30?text=Stellar" alt="Stellar Co." />
           </div>
-      </section>
-  );
+        </div>
+      </div>
+      <div className="hero-visual">
+        <HeroDashboardCard />
+      </div>
+    </section>
+    );
+  };
+
+  // Hero Visual Component
+  const HeroDashboardCard = () => {
+    return (
+      <div className="hero-visual-card">
+        <div className="card-header">
+          <div className="card-title">Document Views</div>
+          <div className="live-badge">
+            <div className="live-dot"></div>
+            Live
+          </div>
+        </div>
+        <div className="graph-container">
+          <svg viewBox="0 0 300 100" className="graph-svg">
+            <defs>
+              <linearGradient id="graph-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="var(--color-primary)" stopOpacity="0.3" />
+                <stop offset="100%" stopColor="var(--color-primary)" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <path className="graph-fill" d="M0,70 C30,20 70,80 100,60 S170,10 200,40 S270,80 300,50 L300,100 L0,100 Z" />
+            <path className="graph-line" d="M0,70 C30,20 70,80 100,60 S170,10 200,40 S270,80 300,50" />
+          </svg>
+        </div>
+      </div>
+    );
+  };
 
   // Social Proof Section
   const SocialProof = () => (
@@ -121,40 +198,54 @@ export default function LandingPage() {
 
   // Features Section
   const FeaturesSection = () => {
+    const [activeFeature, setActiveFeature] = useState(0);
     const features = [
-      { icon: <Zap />, title: "AI Contract Generation", description: "Describe your needs in plain English and let our AI draft a professional, legally-sound contract for you in seconds." },
-      { icon: <FileText />, title: "Smart Document Editor", description: "Easily place signature fields, text boxes, and date stamps. Our AI suggests placements to save you time." },
-      { icon: <Users />, title: "Seamless Collaboration", description: "Invite multiple signers, set signing orders, and track progress in real-time with automated reminders." },
-      { icon: <Shield />, title: "Bank-Grade Security", description: "Your documents are protected with AES-256 encryption and a complete, tamper-proof audit trail for legal compliance." },
-      { icon: <Clock />, title: "Automated Workflows", description: "Set up templates and automated sequences to handle recurring documents, saving you hours of manual work." },
-      { icon: <CheckCircle />, title: "Legally Binding", description: "Endorse signatures are compliant with eIDAS, ESIGN, and UETA regulations, making them legally binding worldwide." }
+      { icon: <Zap />, title: "AI Contract Generation", description: "Describe your needs in plain English and let our AI draft a professional, legally-sound contract for you in seconds.", image: "https://via.placeholder.com/600x400/eff6ff/1d4ed8?text=AI+Drafting" },
+      { icon: <FileText />, title: "Smart Document Editor", description: "Easily place signature fields, text boxes, and date stamps. Our AI suggests placements to save you time.", image: "https://via.placeholder.com/600x400/fef2f2/b91c1c?text=Smart+Editor" },
+      { icon: <Users />, title: "Seamless Collaboration", description: "Invite multiple signers, set signing orders, and track progress in real-time with automated reminders.", image: "https://via.placeholder.com/600x400/f0fdf4/166534?text=Collaboration" },
+      { icon: <Shield />, title: "Bank-Grade Security", description: "Your documents are protected with AES-256 encryption and a complete, tamper-proof audit trail for legal compliance.", image: "https://via.placeholder.com/600x400/ecfdf5/059669?text=Secure+Vault" },
+      { icon: <Clock />, title: "Automated Workflows", description: "Set up templates and automated sequences to handle recurring documents, saving you hours of manual work.", image: "https://via.placeholder.com/600x400/fefce8/a16207?text=Automation" },
+      { icon: <CheckCircle />, title: "Legally Binding", description: "Endorse signatures are compliant with eIDAS, ESIGN, and UETA regulations, making them legally binding worldwide.", image: "https://via.placeholder.com/600x400/faf5ff/7e22ce?text=Legally+Binding" }
     ];
 
     return (
       <section id="features" className="features-section">
         <div className="section-header">
-          <h2 className="section-title">
-            Go Beyond Signing. Automate Your Workflow.
-          </h2>
-          <p className="section-subtitle">
-            Endorse is more than just an e-signature tool. It's an all-in-one platform designed to accelerate your business.
-          </p>
+          <h2 className="section-title">Go Beyond Signing. Automate Your Workflow.</h2>
+          <p className="section-subtitle">Endorse is more than just an e-signature tool. It's an all-in-one platform designed to accelerate your business.</p>
         </div>
 
-        <div className="features-grid">
-          {features.map((feature, idx) => (
-            <div key={idx} className="feature-card">
-              <div className="feature-icon">
-                {React.cloneElement(feature.icon, { className: "w-6 h-6" })}
+        <div className="features-interactive-layout">
+          <div className="features-list">
+            {features.map((feature, idx) => (
+              <div
+                key={idx}
+                className={`feature-list-item ${activeFeature === idx ? 'active' : ''}`}
+                onClick={() => setActiveFeature(idx)}
+                onMouseEnter={() => setActiveFeature(idx)}
+              >
+                <div className="feature-icon">
+                  {React.cloneElement(feature.icon, { className: "w-6 h-6" })}
+                </div>
+                <div>
+                  <h3 className="feature-title">{feature.title}</h3>
+                  <p className="feature-description">{feature.description}</p>
+                </div>
               </div>
-              <h3 className="feature-title">
-                {feature.title}
-              </h3>
-              <p>
-                {feature.description}
-              </p>
+            ))}
+          </div>
+          <div className="feature-image-panel">
+            <div className="feature-image-container">
+              {features.map((feature, idx) => (
+                <img
+                  key={idx}
+                  src={feature.image}
+                  alt={feature.title}
+                  className={`feature-image ${activeFeature === idx ? 'active' : ''}`}
+                />
+              ))}
             </div>
-          ))}
+          </div>
         </div>
       </section>
     );
@@ -362,8 +453,7 @@ export default function LandingPage() {
 
   // Footer
     const Footer = () => {
-        // A simple placeholder for social icons. In a real app, you'd use an icon library.
-        const SocialIcon = ({ children }) => <div className="social-icon">{children}</div>;
+        const SocialIcon = ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" className="social-icon">{children}</a>;
 
         return (
             <footer className="landing-footer">
@@ -376,9 +466,9 @@ export default function LandingPage() {
                             </div>
                             <p>AI-powered digital signatures for modern teams.</p>
                             <div className="social-links">
-                                <SocialIcon>T</SocialIcon>
-                                <SocialIcon>L</SocialIcon>
-                                <SocialIcon>G</SocialIcon>
+                                <SocialIcon href="#"><Twitter size={20} /></SocialIcon>
+                                <SocialIcon href="#"><Linkedin size={20} /></SocialIcon>
+                                <SocialIcon href="#"><Instagram size={20} /></SocialIcon>
                             </div>
                         </div>
 
@@ -427,52 +517,6 @@ export default function LandingPage() {
             </footer>
         );
     };
-
-  // Black Friday Banner with Countdown
-  const BlackFridayBanner = () => {
-    const calculateTimeLeft = () => {
-      const difference = +new Date('2025-11-28T00:00:00') - +new Date();
-      let timeLeft = {};
-
-      if (difference > 0) {
-        timeLeft = {
-          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-          minutes: Math.floor((difference / 1000 / 60) % 60),
-          seconds: Math.floor((difference / 1000) % 60)
-        };
-      }
-      return timeLeft;
-    };
-
-    const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
-
-    React.useEffect(() => {
-      const timer = setTimeout(() => {
-        setTimeLeft(calculateTimeLeft());
-      }, 1000);
-      return () => clearTimeout(timer);
-    });
-
-    const timerComponents = Object.keys(timeLeft).map(interval => {
-      if (!timeLeft[interval] && timeLeft[interval] !== 0) {
-        return null;
-      }
-      return (
-        <div key={interval} className="countdown-segment">
-          <span className="countdown-number">{String(timeLeft[interval]).padStart(2, '0')}</span>
-          <span className="countdown-label">{interval}</span>
-        </div>
-      );
-    });
-
-    return (
-      <div className="black-friday-banner">
-        <p className="banner-text"><span>Black Friday Sale!</span> Get 50% off all plans. Ends in:</p>
-        <div className="countdown-timer">{timerComponents.length ? timerComponents : <span>Deal has ended!</span>}</div>
-      </div>
-    );
-  };
 
   // Video Modal Component
   const VideoModal = ({ isOpen, onClose }) => {
@@ -590,7 +634,6 @@ export default function LandingPage() {
   // Main Render
   return (
     <div style={{ backgroundColor: 'white' }}>
-      <BlackFridayBanner />
       <Navigation />
       <main>
         <HeroSection />
