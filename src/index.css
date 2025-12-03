@@ -8,20 +8,20 @@ THEME & VARIABLE DEFINITIONS
 */
 :root {
     /* Colors */
-    --color-primary: #2563eb; /* Sharp Blue (blue-600) */
-    --color-primary-dark: #1d4ed8; /* Darker Blue (blue-700) */
-    --color-primary-light: #eff6ff; /* Lighter Blue (blue-50) */
-    --color-primary-text: #1e40af; /* Text Blue (blue-800) */
+    --color-primary: #10b981; /* New Green (emerald-500) */
+    --color-primary-dark: #059669; /* Darker Green (emerald-600) */
+    --color-primary-light: #ecfdf5; /* Lighter Green (emerald-50) */
+    --color-primary-text: #065f46; /* Text Green (emerald-800) */
     
     --color-accent-yellow: #facc15; /* Vibrant Yellow (yellow-400) */
 
-    --color-blue: #3b82f6;
-    --color-blue-light: #dbeafe;
-    --color-blue-text: #1e40af;
+    --color-blue: #3b82f6; /* Kept for specific UI elements if needed */
+    --color-blue-light: #dbeafe; /* Kept for specific UI elements if needed */
+    --color-blue-text: #1e40af; /* Kept for specific UI elements if needed */
 
-    --color-purple: #8b5cf6;
-    --color-purple-light: #ede9fe;
-    --color-purple-text: #6d28d9;
+    --color-purple: #475569; /* Swapped purple for a neutral slate */
+    --color-purple-light: #f1f5f9; /* Swapped purple for a neutral slate */
+    --color-purple-text: #1e293b; /* Swapped purple for a neutral slate */
 
     --color-text: #0f172a;
     --color-text-light: #94a3b8;
@@ -389,14 +389,14 @@ HERO SECTION
 
 .graph-line {
     fill: none;
-    stroke: var(--color-primary);
+    stroke: var(--color-primary-dark);
     stroke-width: 3;
     stroke-linecap: round;
     stroke-linejoin: round;
     stroke-dasharray: 500;
     stroke-dashoffset: 500;
     animation: draw-line 3s ease-out forwards;
-    filter: drop-shadow(0 2px 5px rgba(37, 99, 235, 0.5));
+    filter: drop-shadow(0 2px 5px rgba(16, 185, 129, 0.5));
 }
 
 .graph-fill {
@@ -1204,12 +1204,12 @@ FOOTER
     border-radius: var(--radius-lg);
     font-weight: 600;
     transition: all 0.3s;
-    border: 2px solid var(--color-primary);
+    border: 2px solid var(--color-border);
     cursor: pointer;
 }
 
 .btn-secondary:hover {
-    background-color: var(--color-primary-light);
+    background-color: var(--color-background);
 }
 
 .logo-text {
@@ -2524,7 +2524,7 @@ AUTH PAGES (LOGIN/SIGNUP) STYLES
     box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
     position: relative;
     z-index: 1;
-    border: 1px solid rgba(37, 99, 235, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.1);
 }
 
 /* Auth header */
@@ -2548,7 +2548,7 @@ AUTH PAGES (LOGIN/SIGNUP) STYLES
 }
 
 .auth-link {
-    color: var(--color-primary-dark);
+    color: var(--color-primary);
     font-weight: 600;
     background: none;
     border: none;
@@ -2559,7 +2559,7 @@ AUTH PAGES (LOGIN/SIGNUP) STYLES
 }
 
 .auth-link:hover {
-    color: var(--color-primary);
+    color: var(--color-primary-dark);
     text-decoration: underline;
 }
 
@@ -2653,7 +2653,7 @@ AUTH PAGES (LOGIN/SIGNUP) STYLES
 
 .auth-form .input-field:focus {
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
     transform: translateY(-1px);
 }
 
@@ -3008,7 +3008,7 @@ COOKIE CONSENT BANNER
 
 .cookie-link {
     color: white;
-    font-weight: 600;
+    font-weight: 500;
     text-decoration: underline;
     margin-left: 0.5rem;
 }
