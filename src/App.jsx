@@ -4,6 +4,7 @@ import DocumentEditorPage from './DocumentEditorPage';
 import LandingPage from './LandingPage';
 import AboutPage from './AboutPage';
 import LoginPage from './LoginPage';
+import SignupPage from './SignupPage';
 import ContactPage from './ContactPage';
 import { auth } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -61,17 +62,21 @@ function App() {
   }
 
   if (page === '#editor') {
-    // This is a protected route
-    return user ? <DocumentEditorPage user={user} /> : <LoginPage />;
+    // Protected route logic is now handled by the useEffect hook
+    return <DocumentEditorPage user={user} />;
   }
 
   if (page === '#dashboard') {
-    // This is a protected route
-    return user ? <DashboardPage user={user} /> : <LoginPage />;
+    // Protected route logic is now handled by the useEffect hook
+    return <DashboardPage user={user} />;
   }
 
   if (page === '#login') {
     return <LoginPage />;
+  }
+
+  if (page === '#signup') {
+    return <SignupPage />;
   }
 
   if (page === '#about') {

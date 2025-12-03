@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   CheckCircle, FileText, Upload, Clock, CheckSquare, 
   Search, Filter, Plus, MoreVertical, Download, 
@@ -126,8 +126,8 @@ export default function DashboardPage({ user }) { // Accept the user prop
       console.error("Logout Error:", error);
     }
   };
-  // Sidebar Component
-  const Sidebar = () => (
+
+  const Sidebar = ({ user, sidebarOpen }) => (
     <div className={`sidebar ${
       sidebarOpen ? 'w-64' : 'w-0 -ml-64' // Width is controlled by state
     }`}>
@@ -180,7 +180,10 @@ export default function DashboardPage({ user }) { // Accept the user prop
         </nav>
 
         <div className="mt-auto pt-6">
-          <button className="sidebar-btn sidebar-btn-inactive">
+          <button 
+            onClick={() => setCurrentView('settings')}
+            className={`sidebar-btn ${currentView === 'settings' ? 'sidebar-btn-active' : 'sidebar-btn-inactive'}`}
+          >
             <Settings className="w-5 h-5 mr-3" />
             <span>Settings</span>
           </button>
@@ -208,8 +211,8 @@ export default function DashboardPage({ user }) { // Accept the user prop
       </div>
     </div>
   );
-  // Top Navigation
-  const TopNav = () => (
+
+  const TopNav = ({ sidebarOpen, setSidebarOpen }) => (
     <div className={`top-nav ${sidebarOpen ? 'md:left-64' : 'md:left-0'}`}>
       <div className="flex items-center justify-between px-6 h-20">
         <div className="flex items-center space-x-4">
@@ -223,11 +226,12 @@ export default function DashboardPage({ user }) { // Accept the user prop
             {currentView === 'dashboard' && 'Dashboard'}
             {currentView === 'upload' && 'Upload Document'}
             {currentView === 'ai-contract' && 'AI Contract Creator'}
+            {currentView === 'settings' && 'Settings'}
           </h1>
         </div>
 
         <div className="flex items-center space-x-4">
-          <button className="relative p-2 hover:bg-slate-100 rounded-lg transition" aria-label="Notifications">
+          <button onClick={handleShowNotifications} className="relative p-2 hover:bg-slate-100 rounded-lg transition" aria-label="Notifications">
             <Bell className="w-5 h-5 text-slate-600" />
             <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
@@ -478,21 +482,38 @@ export default function DashboardPage({ user }) { // Accept the user prop
     </div>
   );
   // Upload View (Placeholder)
-  const UploadView = () => (
-    <div className="card p-12">
-      <div className="max-w-2xl mx-auto text-center">
-        <div className="w-20 h-20 flex-center bg-emerald-50 rounded-full mx-auto mb-6">
-          <Upload className="w-10 h-10 text-emerald-600" />
+  const UploadView = () => {
+    const fileInputRef = useRef(null);
+
+    const handleChooseFile = () => {
+      fileInputRef.current.click();
+    };
+
+    const handleFileChange = (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        alert(`File selected: ${file.name}`);
+        // Here you would typically start the upload process
+      }
+    };
+
+    return (
+      <div className="card p-12">
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="w-20 h-20 flex-center bg-blue-50 rounded-full mx-auto mb-6">
+            <Upload className="w-10 h-10 text-blue-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">Upload Document</h2>
+          <p className="text-slate-600 mb-8">Drag and drop your PDF file here, or click to browse</p>
+          <button onClick={handleChooseFile} className="btn-primary">
+            Choose File
+          </button>
+          <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf" />
+          <p className="text-sm text-slate-500 mt-4">Supported formats: PDF (Max 10MB)</p>
         </div>
-        <h2 className="text-2xl font-bold text-slate-900 mb-3">Upload Document</h2>
-        <p className="text-slate-600 mb-8">Drag and drop your PDF file here, or click to browse</p>
-        <button className="btn-primary">
-          Choose File
-        </button>
-        <p className="text-sm text-slate-500 mt-4">Supported formats: PDF (Max 10MB)</p>
       </div>
-    </div>
-  );
+    );
+  };
   // AI Contract View (Placeholder)
   const AIContractView = () => (
     <div className="card p-12">
@@ -527,7 +548,10 @@ export default function DashboardPage({ user }) { // Accept the user prop
             ></textarea>
           </div>
 
-          <button className="btn-primary w-full flex-center space-x-2">
+          <button 
+            onClick={() => alert('Generating AI Contract... (This is a placeholder)')} 
+            className="btn-primary w-full flex-center space-x-2"
+          >
             <Zap className="w-5 h-5" />
             <span>Generate Contract with AI</span>
           </button>
@@ -535,17 +559,33 @@ export default function DashboardPage({ user }) { // Accept the user prop
       </div>
     </div>
   );
+  // Settings View (Placeholder)
+  const SettingsView = () => (
+    <div className="card p-12">
+      <div className="max-w-2xl mx-auto text-center">
+        <div className="w-20 h-20 flex-center bg-slate-100 rounded-full mx-auto mb-6">
+          <Settings className="w-10 h-10 text-slate-500" />
+        </div>
+        <h2 className="text-2xl font-bold text-slate-900 mb-3">Settings</h2>
+        <p className="text-slate-600">
+          This is where user profile settings, billing information, and application preferences will go.
+          This view is currently under construction.
+        </p>
+      </div>
+    </div>
+  );
   // Main Render
   return (
     <div className="min-h-screen bg-slate-50">
-      <Sidebar />
-      <TopNav />
+      <Sidebar user={user} sidebarOpen={sidebarOpen} />
+      <TopNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       
       <main className={`pt-24 pb-8 px-6 transition-all duration-300 ${sidebarOpen ? 'md:ml-64' : 'ml-0'}`}>
         <div className="max-w-7xl mx-auto">
           {currentView === 'dashboard' && <DashboardView />}
           {currentView === 'upload' && <UploadView />}
           {currentView === 'ai-contract' && <AIContractView />}
+          {currentView === 'settings' && <SettingsView />}
         </div>
       </main>
     </div>
