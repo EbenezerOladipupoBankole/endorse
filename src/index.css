@@ -587,20 +587,62 @@ FINAL CTA SECTION
 */
 .final-cta-section {
     padding: 6rem 2rem;
-    background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-text) 100%);
+    background-color: var(--color-background);
+}
+
+.final-cta-card {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 6rem 3rem;
+    background: linear-gradient(135deg, var(--color-text) 0%, #1e293b 100%);
     color: white;
     text-align: center;
+    border-radius: var(--radius-xl);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.2);
 }
+
+.final-cta-content {
+    position: relative;
+    z-index: 2;
+}
+
 .final-cta-title {
     font-size: 2.5rem;
     font-weight: 800;
     margin-bottom: 1rem;
 }
+
 .final-cta-subtitle {
     font-size: 1.125rem;
     opacity: 0.8;
     max-width: 600px;
     margin: 0 auto 2.5rem;
+}
+
+.cta-deco-shape {
+    position: absolute;
+    border-radius: var(--radius-full);
+    z-index: 1;
+    filter: blur(80px);
+    opacity: 0.4;
+}
+
+.cta-shape-1 {
+    width: 300px;
+    height: 300px;
+    background-color: var(--color-primary);
+    top: -100px;
+    left: -100px;
+}
+
+.cta-shape-2 {
+    width: 250px;
+    height: 250px;
+    background-color: var(--color-purple);
+    bottom: -80px;
+    right: -80px;
 }
 /* 
 ==============================================
@@ -842,7 +884,7 @@ PRICING SECTION
     max-width: 1280px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 2rem;
 }
 
@@ -905,21 +947,6 @@ PRICING SECTION
     min-height: 3rem;
 }
 
-.plan-features {
-    list-style: none;
-    margin-top: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.plan-features li {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    color: #475569;
-}
-
 .pricing-toggle {
     display: inline-flex;
     align-items: center;
@@ -967,138 +994,167 @@ PRICING SECTION
     border-radius: var(--radius-md);
 }
 
+.pricing-comparison-container {
+    max-width: 1280px;
+    margin: 5rem auto 0;
+}
+
+.comparison-title {
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.pricing-comparison-table {
+    background-color: white;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+}
+
+.comparison-category-header {
+    background-color: var(--color-background);
+    padding: 1rem 1.5rem;
+    font-size: 1.125rem;
+    font-weight: 700;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.comparison-plan-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    padding: 0 1.5rem;
+    font-weight: 600;
+    color: var(--color-text-light);
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.comparison-plan-header div {
+    padding: 1rem 0;
+}
+
+.comparison-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    align-items: center;
+    border-top: 1px solid var(--color-border);
+}
+
+.comparison-row:last-child {
+    border-bottom: none;
+}
+
+.comparison-row .feature-name {
+    padding: 1rem 1.5rem;
+    font-weight: 500;
+    color: #334155;
+}
+
+.comparison-row .feature-value {
+    text-align: center;
+    padding: 1rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Highlight for the 'Professional' plan column in the comparison table */
+.comparison-plan-header > div:nth-child(3),
+.comparison-row > div:nth-child(3) {
+    background-color: var(--color-primary-light);
+}
+
+.comparison-plan-header > div:nth-child(3) {
+    font-weight: 700;
+    color: var(--color-primary-dark);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
 /* 
 ==============================================
 FOOTER
 ==============================================
 */
 .landing-footer {
+    color: #94a3b8; /* slate-400 */
+    padding: 2rem;
     background-color: #0f172a; /* slate-900 */
-    color: white;
-    padding: 6rem 2rem 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.footer-content {
+.footer-top {
     max-width: 1280px;
     margin: 0 auto;
-}
-
-.footer-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 2fr;
-    gap: 3rem;
-    margin-bottom: 4rem;
-}
-
-.footer-column {
     display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+    padding-bottom: 2rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.footer-column h4 {
-    font-weight: 700;
-    color: white;
-    font-size: 1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    opacity: 0.8;
-}
-
-.footer-column ul {
-    list-style: none;
+.footer-center {
     display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    align-items: center;
+    gap: 1.5rem;
 }
 
-.footer-column a, .footer-link-button {
+.footer-center a, .footer-link-button {
     color: #94a3b8;
     text-decoration: none;
     transition: color 0.2s;
-    font-size: 0.9rem;
+    font-size: 0.875rem;
+    font-weight: 500;
 }
 
 .footer-link-button {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 0;
-    text-align: left;
 }
 
-.footer-column a:hover, .footer-link-button:hover {
+.footer-center a:hover, .footer-link-button:hover {
     color: white;
-}
-
-.footer-column p {
-    color: #94a3b8;
-    font-size: 0.9rem;
-    line-height: 1.6;
 }
 
 .social-links {
     display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
+    gap: 1.5rem;
 }
 
 .social-icon {
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: var(--radius-full);
-    background-color: rgba(255, 255, 255, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    cursor: pointer;
+    color: #94a3b8;
     transition: all 0.2s;
 }
 
 .social-icon:hover {
-    background-color: var(--color-primary);
-}
-
-.newsletter-form {
-    display: flex;
-    border-radius: var(--radius-lg);
-    background-color: rgba(255, 255, 255, 0.1);
-    padding: 0.25rem;
-}
-
-.newsletter-form input {
-    flex-grow: 1;
-    background: none;
-    border: none;
     color: white;
-    padding: 0.5rem 1rem;
-    outline: none;
+    transform: scale(1.1);
 }
 
-.newsletter-form button {
-    background-color: var(--color-primary);
-    border: none;
-    border-radius: var(--radius-md);
-    padding: 0.5rem;
-    cursor: pointer;
+@media (max-width: 768px) {
+    .footer-top {
+        flex-direction: column;
+        gap: 2rem;
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
 }
 
 .footer-bottom {
-    padding-top: 2rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 1280px;
+    margin: 0 auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
     color: #94a3b8;
     font-size: 0.875rem;
 }
-
-/* 
-==============================================
-SHARED COMPONENT STYLES
-==============================================
-*/
 
 .footer-legal-links {
     display: flex;
@@ -1107,6 +1163,16 @@ SHARED COMPONENT STYLES
 
 .footer-legal-links a {
     color: #94a3b8;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.footer-legal-links a:hover {
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .footer-bottom { flex-direction: column-reverse; gap: 1rem; }
 }
 
 /* CUSTOM BUTTON STYLES */
@@ -1250,6 +1316,10 @@ RESPONSIVE DESIGN
 
     .features-list, .feature-image-container {
         position: static; /* Remove sticky behavior on mobile */
+    }
+
+    .pricing-grid {
+        grid-template-columns: 1fr;
     }
 
     .comparison-table-container {
@@ -2903,6 +2973,52 @@ ABOUT PAGE STYLES
     .timeline-item .timeline-dot { left: 1rem; transform: translateX(-50%); }
 }
 
+/* 
+==============================================
+COOKIE CONSENT BANNER
+==============================================
+*/
+.cookie-consent-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #0f172a; /* slate-900 */
+    color: #cbd5e1; /* slate-300 */
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    z-index: 1200;
+    box-shadow: 0 -10px 20px rgba(0,0,0,0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    transform: translateY(100%);
+    transition: transform 0.5s ease-in-out;
+}
+
+.cookie-consent-banner.visible {
+    transform: translateY(0);
+}
+
+.cookie-text {
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.cookie-link {
+    color: white;
+    font-weight: 600;
+    text-decoration: underline;
+    margin-left: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .cookie-consent-banner {
+        flex-direction: column;
+        text-align: center;
+    }
+}
 /* 
 ==============================================
 DASHBOARD - NEW STYLES

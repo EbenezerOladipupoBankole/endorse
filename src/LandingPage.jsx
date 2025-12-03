@@ -6,8 +6,14 @@ export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [showCookieBanner, setShowCookieBanner] = useState(false);
 
   useEffect(() => {
+    // Check for cookie consent on mount
+    if (localStorage.getItem('cookiesAccepted') !== 'true') {
+      setShowCookieBanner(true);
+    }
+
     const checkScrollTop = () => {
       if (!showBackToTop && window.pageYOffset > 400) {
         setShowBackToTop(true);
@@ -22,6 +28,11 @@ export default function LandingPage() {
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleAcceptCookies = () => {
+    localStorage.setItem('cookiesAccepted', 'true');
+    setShowCookieBanner(false);
   };
 
   const handleNavigate = (page) => {
@@ -342,17 +353,36 @@ export default function LandingPage() {
   const PricingSection = () => {
     const [billingCycle, setBillingCycle] = useState('monthly');
 
-    const plans = {
-      monthly: [
-        { name: "Starter", price: "0", period: "/ month", description: "For individuals and personal projects.", features: ["3 documents per month", "Basic signature fields", "Email support", "7-day audit trail"], cta: "Start for Free", popular: false },
-        { name: "Professional", price: "29", period: "/ month", description: "For professionals and small teams.", features: ["Unlimited documents", "AI contract generation", "Custom branding", "Priority support", "Team collaboration"], cta: "Start Free Trial", popular: true },
-        { name: "Enterprise", price: "Custom", period: "", description: "For large organizations with custom needs.", features: ["Everything in Pro", "Dedicated account manager", "API access & SSO", "On-premise option"], cta: "Contact Sales", popular: false }
-      ],
-      yearly: [
-        { name: "Starter", price: "0", period: "/ month", description: "For individuals and personal projects.", features: ["3 documents per month", "Basic signature fields", "Email support", "7-day audit trail"], cta: "Start for Free", popular: false },
-        { name: "Professional", price: "23", period: "/ month", description: "For professionals and small teams.", features: ["Unlimited documents", "AI contract generation", "Custom branding", "Priority support", "Team collaboration"], cta: "Start Free Trial", popular: true },
-        { name: "Enterprise", price: "Custom", period: "", description: "For large organizations with custom needs.", features: ["Everything in Pro, plus...", "Dedicated account manager", "API access & SSO", "On-premise option"], cta: "Contact Sales", popular: false }
-      ]
+    const plans = [
+      { name: "Starter", price: { monthly: "0", yearly: "0" }, period: "/ month", description: "For individuals and personal projects.", cta: "Start for Free", popular: false },
+      { name: "Professional", price: { monthly: "29", yearly: "23" }, period: "/ month", description: "For professionals and small teams.", cta: "Start Free Trial", popular: true },
+      { name: "Enterprise", price: { monthly: "Custom", yearly: "Custom" }, period: "", description: "For large organizations with custom needs.", cta: "Contact Sales", popular: false }
+    ];
+
+    const features = [
+      { category: "Core Features", items: [
+        { name: "Documents per month", starter: "3", pro: "Unlimited", enterprise: "Unlimited" },
+        { name: "Legally Binding Signatures", starter: true, pro: true, enterprise: true },
+        { name: "Complete Audit Trail", starter: "7-day", pro: "Full", enterprise: "Full" },
+      ]},
+      { category: "AI & Automation", items: [
+        { name: "AI Contract Generation", starter: false, pro: true, enterprise: true },
+        { name: "AI Smart Field Placement", starter: false, pro: true, enterprise: true },
+        { name: "Automated Workflows", starter: false, pro: false, enterprise: true },
+      ]},
+      { category: "Team & Business", items: [
+        { name: "Team Collaboration", starter: false, pro: true, enterprise: true },
+        { name: "Custom Branding", starter: false, pro: true, enterprise: true },
+        { name: "Priority Support", starter: false, pro: true, enterprise: true },
+        { name: "Dedicated Account Manager", starter: false, pro: false, enterprise: true },
+        { name: "API Access & SSO", starter: false, pro: false, enterprise: true },
+      ]}
+    ];
+
+    const renderCheck = (value) => {
+      if (value === true) return <Check className="w-6 h-6 text-emerald-600" />;
+      if (value === false) return <span className="text-slate-400">-</span>;
+      return <span className="text-sm font-medium text-slate-700">{value}</span>;
     };
 
     return (
@@ -381,29 +411,56 @@ export default function LandingPage() {
           </div>
         </div>
         <div className="pricing-grid">
-          {plans[billingCycle].map((plan, idx) => (
+          {plans.map((plan, idx) => (
             <div key={idx} className={`pricing-card ${plan.popular ? 'popular' : ''}`} style={{ position: 'relative' }}>
               {plan.popular && <div className="popular-badge">Most Popular</div>}
               <h3 className="plan-name">{plan.name}</h3>
               <p className="plan-price">
-                {plan.price !== "Custom" && "$"}
-                {plan.price}
+                {plan.price[billingCycle] !== "Custom" && "$"}
+                {plan.price[billingCycle]}
                 {plan.period && <span style={{ fontSize: '1rem', fontWeight: 500, color: '#64748b', marginLeft: '0.25rem' }}>{plan.period}</span>}
               </p>
               <p className="plan-description">{plan.description}</p>
-          <button onClick={() => handleNavigate('signup')} className={plan.popular ? 'btn-primary' : 'btn-secondary'} style={{ width: '100%' }}>
+              <button onClick={() => handleNavigate('signup')} className={plan.popular ? 'btn-primary' : 'btn-secondary'} style={{ width: '100%', marginTop: '1.5rem' }}>
                 {plan.cta}
               </button>
-              <ul className="plan-features">
-                {plan.features.map((feature, i) => (
-                  <li key={i} className="flex-center" style={{ justifyContent: 'flex-start' }}>
-                    <Check className="w-5 h-5 text-primary" />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
             </div>
           ))}
+        </div>
+
+        <div className="pricing-comparison-container">
+          <h3 className="comparison-title">Compare All Features</h3>
+          <div className="pricing-comparison-table">
+            {features.map((category, catIdx) => (
+              <React.Fragment key={catIdx}>
+                <div className="comparison-category-header">
+                  {category.category}
+                </div>
+                {catIdx === 0 && (
+                  <div className="comparison-plan-header">
+                    <div></div> {/* Empty cell for feature name column */}
+                    <div>Starter</div>
+                    <div>Professional</div>
+                    <div>Enterprise</div>
+                  </div>
+                )}
+                {category.items.map((item, itemIdx) => (
+                  <div key={itemIdx} className="comparison-row">
+                    <div className="feature-name">{item.name}</div>
+                    <div className="feature-value">
+                      {renderCheck(item.starter)}
+                    </div>
+                    <div className="feature-value">
+                      {renderCheck(item.pro)}
+                    </div>
+                    <div className="feature-value">
+                      {renderCheck(item.enterprise)}
+                    </div>
+                  </div>
+                ))}
+              </React.Fragment>
+            ))}
+          </div>
         </div>
       </section>
     );
@@ -443,11 +500,17 @@ export default function LandingPage() {
   // Final CTA Section
   const FinalCTASection = () => (
     <section className="final-cta-section">
-      <h2 className="final-cta-title">Ready to Streamline Your Workflow?</h2>
-      <p className="final-cta-subtitle">Join thousands of businesses that trust Endorse to get their documents signed faster. Start your free 14-day trial today.</p>
-      <button onClick={() => handleNavigate('signup')} className="btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.125rem' }}>
-        Sign Up for Free
-      </button>
+      <div className="final-cta-card">
+        <div className="cta-deco-shape cta-shape-1"></div>
+        <div className="cta-deco-shape cta-shape-2"></div>
+        <div className="final-cta-content">
+          <h2 className="final-cta-title">Ready to Streamline Your Workflow?</h2>
+          <p className="final-cta-subtitle">Join thousands of businesses that trust Endorse to get their documents signed faster. Start your free 14-day trial today.</p>
+          <button onClick={() => handleNavigate('signup')} className="btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.125rem' }}>
+            Sign Up for Free
+          </button>
+        </div>
+      </div>
     </section>
   );
 
@@ -457,62 +520,23 @@ export default function LandingPage() {
 
         return (
             <footer className="landing-footer">
-                <div className="footer-content">
-                    <div className="footer-grid">
-                        {/* Column 1: Brand and Social */}
-                        <div className="footer-column brand-column">
-                            <div className="flex items-center" style={{ marginBottom: '1rem' }}>
-                                <img src={endorseLogo} alt="Endorse Logo" className="logo-img" />
-                            </div>
-                            <p>AI-powered digital signatures for modern teams.</p>
-                            <div className="social-links">
-                                <SocialIcon href="#"><Twitter size={20} /></SocialIcon>
-                                <SocialIcon href="#"><Linkedin size={20} /></SocialIcon>
-                                <SocialIcon href="#"><Instagram size={20} /></SocialIcon>
-                            </div>
-                        </div>
-
-                        {/* Column 2: Product Links */}
-                        <div className="footer-column">
-                            <h4>Product</h4>
-                            <ul>
-                                <li><a href="#features">Features</a></li>
-                                <li><a href="#pricing">Pricing</a></li>
-                                <li><a href="#">Security</a></li>
-                                <li><a href="#">Integrations</a></li>
-                            </ul>
-                        </div>
-
-                        {/* Column 3: Company Links */}
-                        <div className="footer-column">
-                            <h4>Company</h4>
-                            <ul>
-                                <li><button onClick={() => handleNavigate('about')} className="footer-link-button">About Us</button></li>
-                                <li><button onClick={() => handleNavigate('contact')} className="footer-link-button">Contact</button></li>
-                                <li><a href="#">Careers</a></li>
-                            </ul>
-                        </div>
-
-                        {/* Column 4: Newsletter Signup */}
-                        <div className="footer-column newsletter-column">
-                            <h4>Stay Updated</h4>
-                            <p>Get the latest product news and updates.</p>
-                            <div className="newsletter-form">
-                                <input type="email" placeholder="Enter your email" />
-                                <button>
-                                    <Send size={18} />
-                                </button>
-                            </div>
-                        </div>
+                <div className="footer-top">
+                    <img src={endorseLogo} alt="Endorse Logo" className="logo-img" style={{ height: '3rem' }} />
+                    <div className="footer-center">
+                        <a href="#features">Features</a>
+                        <a href="#pricing">Pricing</a>
+                        <button onClick={() => handleNavigate('about')} className="footer-link-button">About</button>
+                        <a href="#">Security</a>
                     </div>
-
-                    <div className="footer-bottom">
-                        <p>© 2025 Endorse. All rights reserved.</p>
-                        <div className="footer-legal-links">
-                            <a href="#">Privacy Policy</a>
-                            <a href="#">Terms of Service</a>
-                        </div>
+                    <div className="social-links">
+                        <SocialIcon href="#"><Twitter size={20} /></SocialIcon>
+                        <SocialIcon href="#"><Linkedin size={20} /></SocialIcon>
+                        <SocialIcon href="#"><Instagram size={20} /></SocialIcon>
                     </div>
+                </div>
+                <div className="footer-bottom">
+                    <p>© 2025 Endorse. All rights reserved.</p>
+                    <div className="footer-legal-links"><a href="#">Terms of Service</a><a href="#">Privacy Policy</a></div>
                 </div>
             </footer>
         );
@@ -631,6 +655,20 @@ export default function LandingPage() {
     );
   };
 
+  // Cookie Consent Banner
+  const CookieConsentBanner = ({ onAccept }) => (
+    <div className={`cookie-consent-banner ${showCookieBanner ? 'visible' : ''}`}>
+      <p className="cookie-text">
+        We use cookies to enhance your browsing experience and analyze our traffic. By clicking "Accept", you consent to our use of cookies. 
+        <a href="#" className="cookie-link">Learn more</a>.
+      </p>
+      <button onClick={onAccept} className="btn-primary" style={{ padding: '0.5rem 1.5rem', flexShrink: 0 }}>
+        Accept
+      </button>
+    </div>
+  );
+
+
   // Main Render
   return (
     <div style={{ backgroundColor: 'white' }}>
@@ -649,6 +687,7 @@ export default function LandingPage() {
         <VideoModal isOpen={isVideoModalOpen} onClose={() => setIsVideoModalOpen(false)} />
         <BackToTopButton />
         <Chatbot />
+        <CookieConsentBanner onAccept={handleAcceptCookies} />
       </main>
     </div>
   );
