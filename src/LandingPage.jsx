@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, FileText, Users, Zap, Shield, Clock, ChevronRight, Menu, X, Check, Star, UploadCloud, PenTool, Send, Plus, ArrowUp, MessageSquare, Twitter, Linkedin, Instagram } from 'lucide-react';
+import { CheckCircle, FileText, Users, Zap, Shield, Clock, ChevronRight, Menu, X, Check, Star, UploadCloud, PenTool, Send, Plus, ArrowUp, MessageSquare, Twitter, Linkedin, Instagram, ChevronDown } from 'lucide-react';
 import endorseLogo from './assets/endorse.webp'; // Import your logo
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState(null);
   const [showCookieBanner, setShowCookieBanner] = useState(false);
 
   useEffect(() => {
@@ -23,7 +24,21 @@ export default function LandingPage() {
     };
 
     window.addEventListener('scroll', checkScrollTop);
-    return () => window.removeEventListener('scroll', checkScrollTop);
+
+    // Add event listener to close dropdown on outside click
+    const handleOutsideClick = (event) => {
+      // Check if the click is outside the dropdown-related elements
+      if (openDropdown && !event.target.closest('.nav-item-dropdown')) {
+        setOpenDropdown(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleOutsideClick);
+
+    return () => {
+      window.removeEventListener('scroll', checkScrollTop);
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
   }, [showBackToTop]);
 
   const scrollToTop = () => {
@@ -39,6 +54,14 @@ export default function LandingPage() {
     window.dispatchEvent(new CustomEvent('navigate', { detail: page }));
   };
 
+  const handleDropdownToggle = (dropdownName) => {
+    if (openDropdown === dropdownName) {
+      setOpenDropdown(null); // Close if already open
+    } else {
+      setOpenDropdown(dropdownName); // Open the clicked one
+    }
+  };
+
   // Navigation Component
   const Navigation = () => (
     <header className="landing-header">
@@ -49,6 +72,23 @@ export default function LandingPage() {
 
         <nav className="landing-nav">
           <a href="#features">Features</a>
+          
+          {/* Tools Dropdown */}
+          <div className="nav-item-dropdown">
+            <button onClick={() => handleDropdownToggle('tools')} className="dropdown-toggle font-medium">
+              Tools
+              <ChevronDown size={16} />
+            </button>
+            <div className={`dropdown-menu ${openDropdown === 'tools' ? 'open' : ''}`}>
+              <a href="/tools/pdf-to-word" className="dropdown-item">PDF to Word</a>
+              <a href="/tools/pdf-to-excel" className="dropdown-item">PDF to Excel</a>
+              <a href="/tools/pdf-to-ppt" className="dropdown-item">PDF to PowerPoint</a>
+              <a href="/tools/compress-pdf" className="dropdown-item">Compress PDF</a>
+              <a href="/tools/merge-pdf" className="dropdown-item">Merge PDF</a>
+              <a href="/tools/split-pdf" className="dropdown-item">Split PDF</a>
+            </div>
+          </div>
+
           <a href="#pricing">Pricing</a>
           <button onClick={() => handleNavigate('about')} className="font-medium" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>About</button>
           <button onClick={() => handleNavigate('login')} className="font-medium" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>

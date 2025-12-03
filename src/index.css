@@ -8,10 +8,10 @@ THEME & VARIABLE DEFINITIONS
 */
 :root {
     /* Colors */
-    --color-primary: #10b981; /* New Green (emerald-500) */
-    --color-primary-dark: #059669; /* Darker Green (emerald-600) */
-    --color-primary-light: #ecfdf5; /* Lighter Green (emerald-50) */
-    --color-primary-text: #065f46; /* Text Green (emerald-800) */
+    --color-primary: #3b82f6; /* Company Blue (blue-500) */
+    --color-primary-dark: #2563eb; /* Darker Blue (blue-600) */
+    --color-primary-light: #dbeafe; /* Lighter Blue (blue-100) */
+    --color-primary-text: #1e40af; /* Text Blue (blue-800) */
     
     --color-accent-yellow: #facc15; /* Vibrant Yellow (yellow-400) */
 
@@ -69,6 +69,17 @@ LANDING PAGE HEADER/NAVIGATION
     50% { transform: translateY(-10px) rotate(5deg); }
 }
 
+@keyframes navLinkFade {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .landing-header {
     position: sticky;
     top: 0;
@@ -95,6 +106,19 @@ LANDING PAGE HEADER/NAVIGATION
     gap: 2rem;
 }
 
+.landing-nav > * {
+    opacity: 0; /* Start hidden */
+    animation: navLinkFade 0.4s ease forwards; /* Apply animation */
+}
+
+/* Staggered animation delay for each nav item */
+.landing-nav > *:nth-child(1) { animation-delay: 0.1s; }
+.landing-nav > *:nth-child(2) { animation-delay: 0.2s; }
+.landing-nav > *:nth-child(3) { animation-delay: 0.3s; }
+.landing-nav > *:nth-child(4) { animation-delay: 0.4s; }
+.landing-nav > *:nth-child(5) { animation-delay: 0.5s; }
+/* Add more if you have more nav items */
+
 .landing-nav a {
     color: #475569;
     text-decoration: none;
@@ -117,6 +141,54 @@ LANDING PAGE HEADER/NAVIGATION
 
 .landing-nav button:hover {
     color: var(--color-primary-dark);
+}
+
+.nav-item-dropdown {
+    position: relative;
+}
+
+.dropdown-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem; /* Space between text and icon */
+}
+
+.dropdown-toggle svg {
+    transition: transform 0.2s ease;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 1rem); /* Position below the nav item with some space */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    box-shadow: 0 10px 20px -5px rgb(0 0 0 / 0.1);
+    padding: 0.5rem;
+    min-width: 220px;
+    z-index: 60;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%) translateY(-10px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+}
+
+.dropdown-item {
+    display: block;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    transition: background-color 0.2s;
+    color: #475569;
+    text-decoration: none;
+}
+
+/* Show dropdown when it has the 'open' class */
+.dropdown-menu.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
 }
 
 .logo-img {
@@ -197,7 +269,7 @@ HERO SECTION
 .deco-shape.shape-2 {
     width: 120px;
     height: 120px;
-    background: linear-gradient(135deg, var(--color-primary), var(--color-blue));
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
     bottom: 10%;
     right: -15%;
     animation-delay: 0.4s;
@@ -396,7 +468,7 @@ HERO SECTION
     stroke-dasharray: 500;
     stroke-dashoffset: 500;
     animation: draw-line 3s ease-out forwards;
-    filter: drop-shadow(0 2px 5px rgba(16, 185, 129, 0.5));
+    filter: drop-shadow(0 2px 5px rgba(37, 99, 235, 0.5));
 }
 
 .graph-fill {
@@ -2288,12 +2360,12 @@ textarea[rows="6"] {
 }
 
 /* Stats card colors - emerald */
-.bg-emerald-50 {
-    background-color: var(--color-primary-light);
+.bg-blue-50 {
+    background-color: var(--color-primary-light); /* Was bg-emerald-50 */
 }
 
-.text-emerald-600 {
-    color: var(--color-primary-dark);
+.text-blue-600 {
+    color: var(--color-primary-dark); /* Was text-emerald-600 */
 }
 
 /* Recent activity borders */
@@ -2403,8 +2475,8 @@ textarea[rows="6"] {
     background-color: #f8fafc;
 }
 
-.hover\:text-emerald-700:hover {
-    color: #047857;
+.hover\:text-blue-700:hover {
+    color: #1d4ed8; /* Was hover:text-emerald-700 */
 }
 
 /* Aria labels (accessibility) */
@@ -3261,8 +3333,8 @@ DASHBOARD - NEW STYLES
 }
 
 /* Gradient Background */
-.gradient-emerald {
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+.gradient-blue {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%); /* Was gradient-emerald */
 }
 
 /* 
