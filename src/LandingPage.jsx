@@ -3,9 +3,8 @@ import { CheckCircle, FileText, Users, Zap, Shield, Clock, ChevronRight, Menu, X
 import endorseLogo from './assets/endorse.webp'; // Import your logo
 
 export default function LandingPage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
-  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [showCookieBanner, setShowCookieBanner] = useState(false);
 
@@ -14,16 +13,6 @@ export default function LandingPage() {
     if (localStorage.getItem('cookiesAccepted') !== 'true') {
       setShowCookieBanner(true);
     }
-
-    const checkScrollTop = () => {
-      if (!showBackToTop && window.pageYOffset > 400) {
-        setShowBackToTop(true);
-      } else if (showBackToTop && window.pageYOffset <= 400) {
-        setShowBackToTop(false);
-      }
-    };
-
-    window.addEventListener('scroll', checkScrollTop);
 
     // Add event listener to close dropdown on outside click
     const handleOutsideClick = (event) => {
@@ -36,14 +25,9 @@ export default function LandingPage() {
     document.addEventListener('mousedown', handleOutsideClick);
 
     return () => {
-      window.removeEventListener('scroll', checkScrollTop);
       document.removeEventListener('mousedown', handleOutsideClick);
     };
-  }, [showBackToTop]);
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  }, [openDropdown]);
 
   const handleAcceptCookies = () => {
     localStorage.setItem('cookiesAccepted', 'true');
@@ -609,18 +593,6 @@ export default function LandingPage() {
     );
   };
 
-  // Back to Top Button
-  const BackToTopButton = () => (
-    <button
-      onClick={scrollToTop}
-      className={`back-to-top-btn ${showBackToTop ? 'visible' : ''}`}
-      aria-label="Go to top"
-      title="Go to top"
-    >
-      <ArrowUp size={24} />
-    </button>
-  );
-
   // Chatbot Component
   const Chatbot = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -662,7 +634,7 @@ export default function LandingPage() {
     };
 
     return (
-      <div className="chatbot-container">
+      <div className="chatbot-container" style={{ position: 'fixed', bottom: '1rem', right: '1rem', zIndex: 1000 }}>
         <div className={`chat-window ${isOpen ? 'open' : ''}`}>
           <div className="chat-header">
             <h3>Endorse Assistant</h3>
@@ -725,7 +697,6 @@ export default function LandingPage() {
         <FinalCTASection />
         <Footer />
         <VideoModal isOpen={isVideoModalOpen} onClose={() => setIsVideoModalOpen(false)} />
-        <BackToTopButton />
         <Chatbot />
         <CookieConsentBanner onAccept={handleAcceptCookies} />
       </main>
