@@ -94,6 +94,23 @@ export default function LandingPage() {
       {mobileMenuOpen && (
         <div className="mobile-nav" style={{ display: 'flex' }}>
           <a href="#features" onClick={() => setMobileMenuOpen(false)}>Features</a>
+          
+          {/* Mobile Tools Dropdown */}
+          <div className="mobile-nav-dropdown">
+            <button onClick={() => handleDropdownToggle('mobile-tools')} className="mobile-dropdown-toggle">
+              Tools
+              <ChevronDown size={16} className={`transition-transform ${openDropdown === 'mobile-tools' ? 'rotate-180' : ''}`} />
+            </button>
+            <div className={`mobile-dropdown-menu ${openDropdown === 'mobile-tools' ? 'open' : ''}`}>
+              <a href="/tools/pdf-to-word" className="dropdown-item">PDF to Word</a>
+              <a href="/tools/pdf-to-excel" className="dropdown-item">PDF to Excel</a>
+              <a href="/tools/pdf-to-ppt" className="dropdown-item">PDF to PowerPoint</a>
+              <a href="/tools/compress-pdf" className="dropdown-item">Compress PDF</a>
+              <a href="/tools/merge-pdf" className="dropdown-item">Merge PDF</a>
+              <a href="/tools/split-pdf" className="dropdown-item">Split PDF</a>
+            </div>
+          </div>
+
           <a href="#pricing" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
           <button onClick={() => { handleNavigate('about'); setMobileMenuOpen(false); }} className="text-left" style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: '0.5rem 0', fontWeight: 500, color: '#475569' }}>About</button>
           <button onClick={() => handleNavigate('login')} className="text-left" style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: '0.5rem 0' }}>
