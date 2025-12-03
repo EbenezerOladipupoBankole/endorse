@@ -6,21 +6,15 @@ import {
   LogOut, User, Menu, X, TrendingUp, Users, 
   FileSignature, Zap, ChevronRight, Calendar
 } from 'lucide-react';
+import { signOut } from "firebase/auth";
+import { auth } from './firebase';
 
-export default function DashboardPage() {
+export default function DashboardPage({ user }) { // Accept the user prop
   const [currentView, setCurrentView] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
-
-  // Mock user data
-  const user = {
-    name: "John Doe",
-    email: "john@company.com",
-    plan: "Professional",
-    avatar: "JD"
-  };
 
   // Mock documents data
   const [documents, setDocuments] = useState([
@@ -116,6 +110,22 @@ export default function DashboardPage() {
     { action: "Created", document: "Invoice #089", user: "You", time: "2 days ago" }
   ];
 
+  // Function to get user initials from display name
+  const getInitials = (name) => {
+    if (!name) return "?";
+    const names = name.split(' ');
+    return names.length > 1 ? `${names[0][0]}${names[names.length - 1][0]}` : names[0][0];
+  };
+
+  // Handle user logout
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      // The onAuthStateChanged listener in App.jsx will handle the redirect.
+    } catch (error) {
+      console.error("Logout Error:", error);
+    }
+  };
   // Sidebar Component
   const Sidebar = () => (
     <div className={`sidebar ${
@@ -179,13 +189,19 @@ export default function DashboardPage() {
 
       <div className="sidebar-footer">
         <div className="user-profile">
-          <div className="user-avatar">{user.avatar}</div>
+          {user.photoURL ? (
+            <img src={user.photoURL} alt="User Avatar" className="user-avatar" />
+          ) : (
+            <div className="user-avatar">
+              {getInitials(user.displayName)}
+            </div>
+          )}
           <div className="user-details">
-            <p className="user-name">{user.name}</p>
-            <p className="user-plan">{user.plan}</p>
+            <p className="user-name">{user.displayName || "New User"}</p>
+            <p className="user-plan">Free Plan</p> {/* Placeholder plan */}
           </div>
         </div>
-        <button className="logout-button">
+        <button onClick={handleLogout} className="logout-button">
           <LogOut className="w-4 h-4" />
           <span>Logout</span>
         </button>

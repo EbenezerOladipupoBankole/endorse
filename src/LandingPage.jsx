@@ -34,10 +34,6 @@ export default function LandingPage() {
     setShowCookieBanner(false);
   };
 
-  const handleNavigate = (page) => {
-    window.dispatchEvent(new CustomEvent('navigate', { detail: page }));
-  };
-
   const handleDropdownToggle = (dropdownName) => {
     if (openDropdown === dropdownName) {
       setOpenDropdown(null); // Close if already open
@@ -74,13 +70,13 @@ export default function LandingPage() {
           </div>
 
           <a href="#pricing">Pricing</a>
-          <button onClick={() => handleNavigate('about')} className="font-medium" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>About</button>
-          <button onClick={() => handleNavigate('login')} className="font-medium" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+          <a href="#about" className="font-medium" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>About</a>
+          <a href="#login" className="font-medium" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
             Login
-          </button>
-          <button onClick={() => handleNavigate('signup')} className="btn-primary" style={{ padding: '0.5rem 1rem' }}>
+          </a>
+          <a href="#signup" className="btn-primary" style={{ padding: '0.5rem 1rem', textDecoration: 'none' }}>
             Sign Up Free
-          </button>
+          </a>
         </nav>
 
         <button
@@ -112,13 +108,13 @@ export default function LandingPage() {
           </div>
 
           <a href="#pricing" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
-          <button onClick={() => { handleNavigate('about'); setMobileMenuOpen(false); }} className="text-left" style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: '0.5rem 0', fontWeight: 500, color: '#475569' }}>About</button>
-          <button onClick={() => handleNavigate('login')} className="text-left" style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: '0.5rem 0' }}>
+          <a href="#about" onClick={() => setMobileMenuOpen(false)} className="text-left" style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: '0.5rem 0', fontWeight: 500, color: '#475569', textDecoration: 'none' }}>About</a>
+          <a href="#login" onClick={() => setMobileMenuOpen(false)} className="text-left" style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: '0.5rem 0', textDecoration: 'none' }}>
             Login
-          </button>
-          <button onClick={() => handleNavigate('signup')} className="btn-primary" style={{ width: '100%' }}>
+          </a>
+          <a href="#signup" className="btn-primary" style={{ width: '100%', textDecoration: 'none', display: 'block', textAlign: 'center' }}>
             Get Started
-          </button>
+          </a>
         </div>
       )}
     </header>
@@ -176,10 +172,10 @@ export default function LandingPage() {
           Endorse combines legally-binding e-signatures with powerful AI tools to streamline your entire document workflow. From creation to completion, do it all in one place.
         </p>
         <div className="hero-actions">
-          <button onClick={() => handleNavigate('signup')} className="btn-primary flex items-center" style={{ padding: '1rem 2rem', fontSize: '1.125rem', gap: '0.5rem' }}>
+          <a href="#signup" className="btn-primary flex items-center" style={{ padding: '1rem 2rem', fontSize: '1.125rem', gap: '0.5rem', textDecoration: 'none' }}>
             Get Started for Free
             <ChevronRight className="w-5 h-5" />
-          </button>
+          </a>
           <button onClick={() => setIsVideoModalOpen(true)} className="btn-secondary" style={{ padding: '1rem 2rem', fontSize: '1.125rem' }}>
             Watch Demo
           </button>
@@ -462,14 +458,14 @@ export default function LandingPage() {
                 {plan.period && <span style={{ fontSize: '1rem', fontWeight: 500, color: '#64748b', marginLeft: '0.25rem' }}>{plan.period}</span>}
               </p>
               <p className="plan-description">{plan.description}</p>
-              <button onClick={() => handleNavigate('signup')} className={plan.popular ? 'btn-primary' : 'btn-secondary'} style={{ width: '100%', marginTop: '1.5rem' }}>
+              <a href="#signup" className={plan.popular ? 'btn-primary' : 'btn-secondary'} style={{ width: '100%', marginTop: '1.5rem', display: 'block', textAlign: 'center', textDecoration: 'none' }}>
                 {plan.cta}
-              </button>
+              </a>
             </div>
           ))}
         </div>
 
-        <div className="pricing-comparison-container">
+        <div className="pricing-comparison-container responsive-table-container">
           <h3 className="comparison-title">Compare All Features</h3>
           <div className="pricing-comparison-table">
             {features.map((category, catIdx) => (
@@ -547,9 +543,9 @@ export default function LandingPage() {
         <div className="final-cta-content">
           <h2 className="final-cta-title">Ready to Streamline Your Workflow?</h2>
           <p className="final-cta-subtitle">Join thousands of businesses that trust Endorse to get their documents signed faster. Start your free 14-day trial today.</p>
-          <button onClick={() => handleNavigate('signup')} className="btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.125rem' }}>
+          <a href="#signup" className="btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.125rem', textDecoration: 'none' }}>
             Sign Up for Free
-          </button>
+          </a>
         </div>
       </div>
     </section>
@@ -566,7 +562,7 @@ export default function LandingPage() {
                     <div className="footer-center">
                         <a href="#features">Features</a>
                         <a href="#pricing">Pricing</a>
-                        <button onClick={() => handleNavigate('about')} className="footer-link-button">About</button>
+                        <a href="#about" className="footer-link-button">About</a>
                         <a href="#">Security</a>
                     </div>
                     <div className="social-links">
