@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   CheckCircle, FileText, Upload, Clock, CheckSquare, 
   Search, Filter, Plus, MoreVertical, Download, 
@@ -11,7 +11,7 @@ import { auth } from './firebase';
 
 export default function DashboardPage({ user }) { // Accept the user prop
   const [currentView, setCurrentView] = useState('dashboard');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -127,6 +127,31 @@ export default function DashboardPage({ user }) { // Accept the user prop
     }
   };
 
+  const handleShowNotifications = () => {
+    // In a real app, this would open a dropdown or a modal.
+    alert('Showing notifications...');
+  };
+
+  // Effect to handle window resize for sidebar
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 768) {
+        setSidebarOpen(true);
+      } else {
+        setSidebarOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Function to handle view change and close sidebar on mobile
+  const handleViewChange = (view) => {
+    setCurrentView(view);
+    if (window.innerWidth <= 768) {
+      setSidebarOpen(false);
+    }
+  };
   const Sidebar = ({ user, sidebarOpen }) => (
     <div className={`sidebar ${
       sidebarOpen ? 'w-64' : 'w-0 -ml-64' // Width is controlled by state
@@ -141,7 +166,7 @@ export default function DashboardPage({ user }) { // Accept the user prop
 
         <nav className="space-y-2">
           <button 
-            onClick={() => setCurrentView('dashboard')}
+            onClick={() => handleViewChange('dashboard')}
             className={`sidebar-btn ${currentView === 'dashboard' ? 'sidebar-btn-active' : 'sidebar-btn-inactive'}`}
           >
             <FileText className="w-5 h-5 mr-3" />
@@ -149,7 +174,7 @@ export default function DashboardPage({ user }) { // Accept the user prop
           </button>
 
           <button 
-            onClick={() => setCurrentView('upload')}
+            onClick={() => handleViewChange('upload')}
             className={`sidebar-btn ${currentView === 'upload' ? 'sidebar-btn-active' : 'sidebar-btn-inactive'}`}
           >
             <Upload className="w-5 h-5 mr-3" />
@@ -157,7 +182,7 @@ export default function DashboardPage({ user }) { // Accept the user prop
           </button>
 
           <button 
-            onClick={() => setCurrentView('ai-contract')}
+            onClick={() => handleViewChange('ai-contract')}
             className={`sidebar-btn ${currentView === 'ai-contract' ? 'sidebar-btn-active' : 'sidebar-btn-inactive'}`}
           >
             <Zap className="w-5 h-5 mr-3" />
@@ -181,7 +206,7 @@ export default function DashboardPage({ user }) { // Accept the user prop
 
         <div className="mt-auto pt-6">
           <button 
-            onClick={() => setCurrentView('settings')}
+            onClick={() => handleViewChange('settings')}
             className={`sidebar-btn ${currentView === 'settings' ? 'sidebar-btn-active' : 'sidebar-btn-inactive'}`}
           >
             <Settings className="w-5 h-5 mr-3" />
@@ -212,8 +237,8 @@ export default function DashboardPage({ user }) { // Accept the user prop
     </div>
   );
 
-  const TopNav = ({ sidebarOpen, setSidebarOpen }) => (
-    <div className={`top-nav ${sidebarOpen ? 'md:left-64' : 'md:left-0'}`}>
+  const TopNav = ({ sidebarOpen, setSidebarOpen, handleShowNotifications }) => (
+    <div className={`top-nav ${sidebarOpen ? 'md:left-64' : 'md:left-0'}`} >
       <div className="flex items-center justify-between px-6 h-20">
         <div className="flex items-center space-x-4">
           <button 
@@ -577,8 +602,16 @@ export default function DashboardPage({ user }) { // Accept the user prop
   // Main Render
   return (
     <div className="min-h-screen bg-slate-50">
+      {/* Overlay for mobile */}
+      {sidebarOpen && (
+        <div 
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 bg-black/50 z-50 md:hidden"
+          aria-hidden="true"
+        ></div>
+      )}
       <Sidebar user={user} sidebarOpen={sidebarOpen} />
-      <TopNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <TopNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} handleShowNotifications={handleShowNotifications} />
       
       <main className={`pt-24 pb-8 px-6 transition-all duration-300 ${sidebarOpen ? 'md:ml-64' : 'ml-0'}`}>
         <div className="max-w-7xl mx-auto">

@@ -10,50 +10,41 @@ import { auth } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
 // This is a simple router to switch between pages.
-// In a larger application, you would use a library like React Router.
 function App() {
-  const [page, setPage] = useState(window.location.hash || '#home');
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(null); // Start with no page determined
 
-  React.useEffect(() => {
-    const handleHashChange = () => {
-      setPage(window.location.hash || '#home'); // Always update the page state from the hash
-    };
-
-    window.addEventListener('hashchange', handleHashChange);
-
-    return () => {
-      window.removeEventListener('hashchange', handleHashChange);
-    };
-  }, []); // This effect should only run once
-
-  // Listen for authentication state changes
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoading(false);
+
+      // --- Centralized Routing Logic ---
+      const currentHash = window.location.hash || '#home';
+      const isAuthPage = currentHash === '#login' || currentHash === '#signup';
+      const isProtectedPage = currentHash === '#dashboard' || currentHash === '#editor';
+
+      if (currentUser && isAuthPage) {
+        // Logged-in user on auth page -> redirect to dashboard
+        window.location.hash = '#dashboard';
+      } else if (!currentUser && isProtectedPage) {
+        // Logged-out user on protected page -> redirect to login
+        window.location.hash = '#login';
+      } else {
+        // Otherwise, set the page normally
+        setPage(currentHash);
+      }
     });
 
-    // Cleanup subscription on unmount
-    return () => unsubscribe();
-  }, []); // This effect also runs only once to set up the listener
+    const handleHashChange = () => setPage(window.location.hash || '#home');
+    window.addEventListener('hashchange', handleHashChange);
 
-  // This effect handles the routing logic based on auth state
-  React.useEffect(() => {
-    if (loading) return; // Don't do anything while checking auth
-
-    const isAuthPage = page === '#login' || page === '#signup';
-    const isProtectedPage = page === '#dashboard' || page === '#editor';
-
-    if (user && isAuthPage) {
-      // If a logged-in user tries to go to the login page, redirect to dashboard
-      window.location.hash = '#dashboard';
-    } else if (!user && isProtectedPage) {
-      // If a logged-out user tries to access a protected page, redirect to login
-      window.location.hash = '#login';
-    }
-  }, [user, page, loading]);
+    return () => {
+      unsubscribe();
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, []);
 
   // Show a loading indicator while Firebase checks auth status
   if (loading) {
@@ -62,13 +53,11 @@ function App() {
   }
 
   if (page === '#editor') {
-    // Protected route logic is now handled by the useEffect hook
-    return <DocumentEditorPage user={user} />;
+    return user ? <DocumentEditorPage user={user} /> : <LoginPage />;
   }
 
   if (page === '#dashboard') {
-    // Protected route logic is now handled by the useEffect hook
-    return <DashboardPage user={user} />;
+    return user ? <DashboardPage user={user} /> : <LoginPage />;
   }
 
   if (page === '#login') {

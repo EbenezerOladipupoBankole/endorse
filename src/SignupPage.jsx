@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { CheckCircle, Mail, Lock, ArrowRight, UserPlus, Eye, EyeOff } from 'lucide-react';
-import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from './firebase'; // Import the auth instance
 
 export default function SignupPage() {
@@ -12,6 +12,7 @@ export default function SignupPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // Email/Password Signup Handler
   const handleSignup = async (e) => {
     e.preventDefault();
     setError('');
@@ -28,7 +29,12 @@ export default function SignupPage() {
 
     setLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      // Set a display name from the email for consistency
+      const nameFromEmail = email.split('@')[0];
+      await updateProfile(userCredential.user, {
+        displayName: nameFromEmail
+      });
       // On success, the onAuthStateChanged listener in App.jsx will handle the redirect.
     } catch (err) {
       if (err.code === 'auth/email-already-in-use') {
@@ -44,11 +50,12 @@ export default function SignupPage() {
     }
   };
 
+  // Google Sign-In/Sign-Up Handler
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
     try {
       setError('');
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
       // The user is signed in. `App.jsx` will handle the redirect.
     } catch (error) {
       console.error("Google Sign-In Error:", error.code, error.message);

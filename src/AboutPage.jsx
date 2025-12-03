@@ -4,8 +4,12 @@ import endorseLogo from './assets/endorse.webp';
 // import founderImage from './assets/founder.jpg'; // This line is causing the error, so we'll comment it out for now.
 
 export default function AboutPage() {
-  const handleNavigate = (page) => {
-    window.dispatchEvent(new CustomEvent('navigate', { detail: page }));
+  const handleNavigateHome = () => {
+    window.location.hash = '#home';
+  };
+
+  const handleNavigateSignup = () => {
+    window.location.hash = '#signup';
   };
 
   const founder = {
@@ -27,7 +31,7 @@ export default function AboutPage() {
       <header className="about-header">
         <div className="about-header-content">
           <img src={endorseLogo} alt="Endorse Logo" className="logo-img" style={{ height: '4rem' }} />
-          <button onClick={() => handleNavigate('landing')} className="back-to-home-btn">
+          <button onClick={handleNavigateHome} className="back-to-home-btn">
             <ArrowLeft size={16} />
             Back to Home
           </button>
@@ -79,7 +83,7 @@ export default function AboutPage() {
         <section className="final-cta-section">
           <h2 className="final-cta-title">Join Us on Our Mission</h2>
           <p className="final-cta-subtitle">Experience the future of document workflows. Start your free trial and see how Endorse can transform your business.</p>
-          <button onClick={() => handleNavigate('signup')} className="btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.125rem' }}>
+          <button onClick={handleNavigateSignup} className="btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.125rem' }}>
             Get Started for Free
           </button>
         </section>
