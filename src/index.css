@@ -216,8 +216,53 @@ LANDING PAGE HEADER/NAVIGATION
     border-top: 1px solid var(--color-border);
 }
 
+.mobile-nav.open { display: flex; } .mobile-nav { display: none; }
 .mobile-nav a {
     color: #475569;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 0;
+}
+
+/* 
+==============================================
+MOBILE NAVIGATION DROPDOWN
+==============================================
+*/
+.mobile-dropdown-toggle {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem 0;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #475569;
+    font-family: inherit;
+}
+
+.mobile-dropdown-toggle svg {
+    transition: transform 0.2s ease;
+}
+
+.mobile-dropdown-toggle.open svg {
+    transform: rotate(180deg);
+}
+
+.mobile-dropdown-menu {
+    /* display: none; */ /* We now control visibility with max-height */
+    padding-left: 1rem; /* Indent the sub-items */
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.3s ease-out;
+}
+
+.mobile-dropdown-item {
+    display: block;
+    color: #64748b; /* slate-500 */
     text-decoration: none;
     font-weight: 500;
     padding: 0.5rem 0;
@@ -1336,7 +1381,7 @@ RESPONSIVE DESIGN
     }
 
     .landing-nav {
-        display: none;
+        display: none !important; /* Ensure desktop nav is hidden */
     }
     
     .mobile-menu-btn {
