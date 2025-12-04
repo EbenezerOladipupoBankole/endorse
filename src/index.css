@@ -1,3 +1,4 @@
+
 /* This is a standard CSS file converted from Tailwind CSS.
    The original @tailwind directives have been removed as they require a build step. */
 
@@ -3219,6 +3220,11 @@ DASHBOARD - NEW STYLES
     z-index: 100;
     transition: all 0.3s ease;
     overflow-x: hidden;
+    width: 16rem; /* Default width */
+}
+
+.sidebar.collapsed {
+    width: 0;
 }
 
 .sidebar-content {
@@ -3354,6 +3360,25 @@ DASHBOARD - NEW STYLES
     border-bottom: 1px solid var(--color-border);
     z-index: 40;
     transition: all 0.3s ease;
+    left: 16rem; /* Default left position */
+}
+
+.top-nav.collapsed {
+    left: 0;
+}
+
+/* Main Content Area */
+.dashboard-main {
+    transition: margin-left 0.3s ease;
+    padding-top: 6rem; /* pt-24 */
+    padding-bottom: 2rem; /* pb-8 */
+    padding-left: 1.5rem; /* px-6 */
+    padding-right: 1.5rem; /* px-6 */
+    margin-left: 16rem; /* Default margin */
+}
+
+.dashboard-main.collapsed {
+    margin-left: 0;
 }
 
 /* Main Content & Cards */
@@ -3524,5 +3549,18 @@ CONTACT PAGE STYLES
 @media (max-width: 1024px) {
     .contact-content-grid {
         grid-template-columns: 1fr;
+    }
+}
+
+/* Responsive Dashboard - Mobile Sidebar */
+@media (max-width: 767px) {
+    .sidebar {
+        left: -16rem; /* Start off-screen */
+    }
+    .sidebar.open {
+        left: 0; /* Slide in when open */
+    }
+    .dashboard-main {
+        margin-left: 0 !important;
     }
 }

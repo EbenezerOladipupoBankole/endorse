@@ -7,7 +7,9 @@ import {
   FileSignature, Zap, ChevronRight, Calendar
 } from 'lucide-react';
 import { signOut } from "firebase/auth";
-import { auth } from './firebase';
+import { auth, db } from './firebase'; // Import db
+import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, deleteDoc } from "firebase/firestore"; // Import firestore functions
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 export default function DashboardPage({ user }) { // Accept the user prop
   const [currentView, setCurrentView] = useState('dashboard');
@@ -15,100 +17,19 @@ export default function DashboardPage({ user }) { // Accept the user prop
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [documents, setDocuments] = useState([]);
+  const [loadingDocs, setLoadingDocs] = useState(true);
 
-  // Mock documents data
-  const [documents, setDocuments] = useState([
-    {
-      id: 1,
-      name: "Employment Contract - Sarah Johnson",
-      status: "completed",
-      date: "2024-11-28",
-      type: "Contract",
-      signers: 2,
-      signedBy: 2,
-      size: "245 KB"
-    },
-    {
-      id: 2,
-      name: "NDA - Tech Corp Partnership",
-      status: "pending",
-      date: "2024-11-27",
-      type: "NDA",
-      signers: 3,
-      signedBy: 1,
-      size: "189 KB"
-    },
-    {
-      id: 3,
-      name: "Service Agreement Q4 2024",
-      status: "pending",
-      date: "2024-11-26",
-      type: "Agreement",
-      signers: 2,
-      signedBy: 1,
-      size: "312 KB"
-    },
-    {
-      id: 4,
-      name: "Freelance Invoice #2024-089",
-      status: "draft",
-      date: "2024-11-25",
-      type: "Invoice",
-      signers: 1,
-      signedBy: 0,
-      size: "156 KB"
-    },
-    {
-      id: 5,
-      name: "Lease Agreement - Office Space",
-      status: "completed",
-      date: "2024-11-20",
-      type: "Lease",
-      signers: 2,
-      signedBy: 2,
-      size: "423 KB"
-    }
-  ]);
-
-  // Stats data
+  // NOTE: In a real application, these would also be fetched from your backend.
+  // For now, they are placeholders.
   const stats = [
-    {
-      label: "Documents This Month",
-      value: "24",
-      change: "+12%",
-      icon: <FileText className="w-6 h-6" />,
-      color: "emerald"
-    },
-    {
-      label: "Pending Signatures",
-      value: "7",
-      change: "3 urgent",
-      icon: <Clock className="w-6 h-6" />,
-      color: "amber"
-    },
-    {
-      label: "Completed",
-      value: "142",
-      change: "+8 this week",
-      icon: <CheckSquare className="w-6 h-6" />,
-      color: "blue"
-    },
-    {
-      label: "AI Contracts Created",
-      value: "18",
-      change: "+5 this week",
-      icon: <Zap className="w-6 h-6" />,
-      color: "purple"
-    }
+    { label: "Documents This Month", value: "0", change: "", icon: <FileText className="w-6 h-6" />, color: "emerald" },
+    { label: "Pending Signatures", value: "0", change: "", icon: <Clock className="w-6 h-6" />, color: "amber" },
+    { label: "Completed", value: "0", change: "", icon: <CheckSquare className="w-6 h-6" />, color: "blue" },
+    { label: "AI Contracts Created", value: "0", change: "", icon: <Zap className="w-6 h-6" />, color: "purple" }
   ];
 
-  // Recent activity
-  const recentActivity = [
-    { action: "Signed", document: "Employment Contract", user: "Sarah Johnson", time: "2 hours ago" },
-    { action: "Sent", document: "NDA Document", user: "You", time: "5 hours ago" },
-    { action: "Viewed", document: "Service Agreement", user: "Mike Chen", time: "1 day ago" },
-    { action: "Created", document: "Invoice #089", user: "You", time: "2 days ago" }
-  ];
+  const recentActivity = [];
 
   // Function to get user initials from display name
   const getInitials = (name) => {
@@ -145,6 +66,33 @@ export default function DashboardPage({ user }) { // Accept the user prop
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Effect to fetch user's documents from Firestore
+  useEffect(() => {
+    if (user && user.uid) {
+      setLoadingDocs(true);
+      const docsCollection = collection(db, 'documents');
+      // This query finds documents where the userId field matches the logged-in user's ID.
+      const q = query(docsCollection, where("userId", "==", user.uid));
+
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const userDocs = [];
+        querySnapshot.forEach((doc) => {
+          userDocs.push({ id: doc.id, ...doc.data() });
+        });
+        setDocuments(userDocs);
+        setLoadingDocs(false);
+      }, (error) => {
+        console.error("Error fetching documents: ", error);
+        setLoadingDocs(false);
+      });
+
+      // Cleanup subscription on unmount
+      return () => unsubscribe();
+    } else {
+      setDocuments([]); // Clear documents if no user is logged in
+    }
+  }, [user]); // Rerun this effect when the user object changes
+
   // Function to handle view change and close sidebar on mobile
   const handleViewChange = (view) => {
     setCurrentView(view);
@@ -153,9 +101,9 @@ export default function DashboardPage({ user }) { // Accept the user prop
     }
   };
   const Sidebar = ({ user, sidebarOpen }) => (
-    <div className={`sidebar ${
-      sidebarOpen ? 'w-64' : 'w-0 -ml-64' // Width is controlled by state
-    }`}>
+    <div 
+      className={`sidebar ${!sidebarOpen && 'collapsed'} ${sidebarOpen && window.innerWidth <= 768 && 'open'}`}
+    >
       <div className="sidebar-content">
         <div className="dashboard-logo">
           <div className="dashboard-logo-icon">
@@ -238,12 +186,12 @@ export default function DashboardPage({ user }) { // Accept the user prop
   );
 
   const TopNav = ({ sidebarOpen, setSidebarOpen, handleShowNotifications }) => (
-    <div className={`top-nav ${sidebarOpen ? 'md:left-64' : 'md:left-0'}`} >
+    <div className={`top-nav ${!sidebarOpen && 'collapsed'}`} >
       <div className="flex items-center justify-between px-6 h-20">
         <div className="flex items-center space-x-4">
           <button 
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="md:hidden p-2 hover:bg-slate-100 rounded-lg transition"
+            className="p-2 hover:bg-slate-100 rounded-lg transition"
           >
             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -368,7 +316,7 @@ export default function DashboardPage({ user }) { // Accept the user prop
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-slate-200">
-              {filteredDocs.map((doc) => (
+              {!loadingDocs && filteredDocs.map((doc) => (
                 <tr 
                   key={doc.id} 
                   className="hover:bg-slate-50 transition cursor-pointer"
@@ -406,7 +354,7 @@ export default function DashboardPage({ user }) { // Accept the user prop
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm text-slate-500">
-                    {new Date(doc.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    {doc.date ? new Date(doc.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
                   </td>
                   <td className="px-6 py-4">
                     <div className="table-actions">
@@ -419,7 +367,19 @@ export default function DashboardPage({ user }) { // Accept the user prop
                       <button className="table-action-btn" title="Send">
                         <Send className="w-4 h-4" />
                       </button>
-                      <button className="table-action-btn delete" title="Delete">
+                      <button 
+                        className="table-action-btn delete" 
+                        title="Delete"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent row click
+                          if (window.confirm(`Are you sure you want to delete "${doc.name}"?`)) {
+                            const docRef = doc(db, "documents", doc.id);
+                            deleteDoc(docRef);
+                            // Note: This doesn't delete the file from Storage. 
+                            // That would require another function call.
+                          }
+                        }}
+                      >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
@@ -430,7 +390,16 @@ export default function DashboardPage({ user }) { // Accept the user prop
           </table>
         </div>
 
-        {filteredDocs.length === 0 && (
+        {loadingDocs && (
+          <div className="p-12 text-center">
+            <div role="status" className="flex items-center justify-center">
+                <svg aria-hidden="true" className="w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/><path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5424 39.6781 93.9676 39.0409Z" fill="currentFill"/></svg>
+                <span className="text-slate-500 ml-3">Loading your documents...</span>
+            </div>
+          </div>
+        )}
+
+        {!loadingDocs && filteredDocs.length === 0 && (
           <div className="p-12 text-center">
             <FileText className="w-12 h-12 text-slate-300 mx-auto mb-4" />
             <p className="text-slate-500">No documents found</p>
@@ -443,7 +412,7 @@ export default function DashboardPage({ user }) { // Accept the user prop
   const RecentActivity = () => (
     <div className="card">
       <h3 className="text-lg font-semibold text-slate-900 mb-4">Recent Activity</h3>
-      <div className="space-y-4">
+      {recentActivity.length > 0 ? (<div className="space-y-4">
         {recentActivity.map((activity, idx) => (
           <div key={idx} className="flex items-start space-x-3 pb-4 border-b border-slate-100 last:border-b-0 last:pb-0">
             <div className="w-8 h-8 flex-center bg-emerald-50 rounded-full text-emerald-600 flex-shrink-0">
@@ -457,11 +426,17 @@ export default function DashboardPage({ user }) { // Accept the user prop
             </div>
           </div>
         ))}
-      </div>
-      <button className="w-full mt-4 py-2 text-emerald-600 hover:text-emerald-700 font-medium flex-center space-x-1">
-        <span>View All Activity</span>
-        <ChevronRight className="w-4 h-4" />
-      </button>
+      </div>) : (
+        <div className="p-6 text-center text-slate-500">
+          No recent activity to show.
+        </div>
+      )}
+      {recentActivity.length > 0 && (
+        <button className="w-full mt-4 py-2 text-emerald-600 hover:text-emerald-700 font-medium flex-center space-x-1">
+          <span>View All Activity</span>
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      )}
     </div>
   );
   // Quick Actions Panel
@@ -509,81 +484,292 @@ export default function DashboardPage({ user }) { // Accept the user prop
   // Upload View (Placeholder)
   const UploadView = () => {
     const fileInputRef = useRef(null);
-
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [error, setError] = useState('');
+ 
     const handleChooseFile = () => {
       fileInputRef.current.click();
     };
-
+ 
     const handleFileChange = (event) => {
       const file = event.target.files[0];
-      if (file) {
-        alert(`File selected: ${file.name}`);
-        // Here you would typically start the upload process
+      if (!file) return;
+ 
+      // Basic validation
+      if (file.type !== 'application/pdf') {
+        setError('Only PDF files are supported.');
+        return;
       }
+      if (file.size > 10 * 1024 * 1024) { // 10MB
+        setError('File size cannot exceed 10MB.');
+        return;
+      }
+ 
+      uploadFile(file);
     };
-
+ 
+    const uploadFile = (file) => {
+      if (!user) {
+        setError("You must be logged in to upload a file.");
+        return;
+      }
+ 
+      setIsUploading(true);
+      setError('');
+      setUploadProgress(0);
+ 
+      const storage = getStorage();
+      const storageRef = ref(storage, `documents/${user.uid}/${Date.now()}-${file.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+ 
+      uploadTask.on('state_changed',
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          setUploadProgress(progress);
+        },
+        (error) => {
+          console.error("Upload failed:", error);
+          setError('An error occurred during upload. Please try again.');
+          setIsUploading(false);
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
+            // File uploaded, now create Firestore document
+            try {
+              await addDoc(collection(db, "documents"), {
+                userId: user.uid,
+                name: file.name,
+                url: downloadURL,
+                size: `${(file.size / 1024).toFixed(2)} KB`,
+                type: 'PDF',
+                status: 'draft', // Default status
+                signers: 1, // Default value
+                signedBy: 0, // Default value
+                date: serverTimestamp(), // Use server timestamp
+              });
+              // Success! Go back to the dashboard
+              handleViewChange('dashboard');
+            } catch (e) {
+              console.error("Error adding document to Firestore: ", e);
+              setError('Failed to save the document after upload.');
+              setIsUploading(false);
+            }
+          });
+        }
+      );
+    };
+ 
     return (
       <div className="card p-12">
         <div className="max-w-2xl mx-auto text-center">
           <div className="w-20 h-20 flex-center bg-blue-50 rounded-full mx-auto mb-6">
             <Upload className="w-10 h-10 text-blue-600" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">Upload Document</h2>
-          <p className="text-slate-600 mb-8">Drag and drop your PDF file here, or click to browse</p>
-          <button onClick={handleChooseFile} className="btn-primary">
-            Choose File
-          </button>
-          <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf" />
-          <p className="text-sm text-slate-500 mt-4">Supported formats: PDF (Max 10MB)</p>
+          {!isUploading ? (
+            <>
+              <h2 className="text-2xl font-bold text-slate-900 mb-3">Upload Document</h2>
+              <p className="text-slate-600 mb-8">Drag and drop your PDF file here, or click to browse</p>
+              <button onClick={handleChooseFile} className="btn-primary">
+                Choose File
+              </button>
+              <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf" />
+              {error && <p className="text-sm text-red-600 mt-4">{error}</p>}
+              <p className="text-sm text-slate-500 mt-4">Supported formats: PDF (Max 10MB)</p>
+            </>
+          ) : (
+            <>
+              <h2 className="text-2xl font-bold text-slate-900 mb-3">Uploading...</h2>
+              <p className="text-slate-600 mb-8">Please wait while your document is being uploaded.</p>
+              <div className="w-full bg-slate-200 rounded-full h-2.5">
+                <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${uploadProgress}%` }}></div>
+              </div>
+              <p className="text-sm font-medium text-slate-700 mt-2">{Math.round(uploadProgress)}%</p>
+            </>
+          )}
         </div>
       </div>
     );
   };
   // AI Contract View (Placeholder)
-  const AIContractView = () => (
-    <div className="card p-12">
-      <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 flex-center bg-purple-50 rounded-full mx-auto mb-6">
-            <Zap className="w-10 h-10 text-purple-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">AI Contract Creator</h2>
-          <p className="text-slate-600">Describe the contract you need and let AI generate it for you</p>
-        </div>
+  const AIContractView = () => {
+    const [contractType, setContractType] = useState('Employment Contract');
+    const [description, setDescription] = useState('');
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [generatedContract, setGeneratedContract] = useState('');
+    const [error, setError] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
 
-        <div className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Contract Type</label>
-            <select className="input-field">
-              <option>Employment Contract</option>
-              <option>NDA</option>
-              <option>Service Agreement</option>
-              <option>Freelance Contract</option>
-              <option>Lease Agreement</option>
-              <option>Custom</option>
-            </select>
+    const handleGenerateContract = async () => {
+      if (!description) {
+        setError('Please describe your needs for the contract.');
+        return;
+      }
+
+      setIsGenerating(true);
+      setError('');
+      setGeneratedContract('');
+
+      // In a real application, you would send this data to your backend
+      // which then calls the AI service (e.g., OpenAI, Gemini).
+      try {
+        // Simulating a network request to a backend endpoint
+        await new Promise(resolve => setTimeout(resolve, 2500));
+
+        // Mock response from the AI
+        const mockResponse = `
+## ${contractType}
+
+**Generated on:** ${new Date().toLocaleDateString()}
+
+**Parties:**
+- [Your Company Name] ("The Company")
+- [Employee/Contractor Name] ("The Individual")
+
+**Based on your description:**
+${description}
+
+---
+
+### 1. Position and Duties
+The Individual will serve as a Senior Software Engineer. Duties will include designing, developing, and maintaining software applications as directed by The Company.
+
+### 2. Compensation
+The Company will pay The Individual a salary of $120,000 per year, payable in bi-weekly installments.
+
+### 3. Work Arrangement
+This is a remote position. The Individual is expected to be available during standard business hours in their local time zone.
+
+*(Disclaimer: This is an AI-generated document. It is not legal advice. Please consult with a legal professional before use.)*
+        `;
+        setGeneratedContract(mockResponse);
+      } catch (e) {
+        setError('An unexpected error occurred. Please try again.');
+        console.error(e);
+      } finally {
+        setIsGenerating(false);
+      }
+    };
+
+    const handleSaveContract = async () => {
+      if (!generatedContract || !user) {
+        setError("Cannot save an empty contract or user not found.");
+        return;
+      }
+      setIsSaving(true);
+      setError('');
+
+      try {
+        // Create a new document in the 'documents' collection
+        const docRef = await addDoc(collection(db, "documents"), {
+          userId: user.uid,
+          name: contractType,
+          content: generatedContract, // Storing the text content
+          size: `${(generatedContract.length / 1024).toFixed(2)} KB`,
+          type: 'AI Generated',
+          status: 'draft',
+          signers: 1,
+          signedBy: 0,
+          date: serverTimestamp(),
+        });
+
+        // After saving, navigate to the editor view for the new document.
+        // This simulates opening the document to sign it.
+        window.dispatchEvent(new CustomEvent('navigate', { detail: 'editor' }));
+
+      } catch (e) {
+        console.error("Error saving document: ", e);
+        setError("Failed to save the contract. Please try again.");
+      } finally {
+        setIsSaving(false);
+      }
+    };
+
+    return (
+      <div className="card p-12">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-8">
+            <div className="w-20 h-20 flex-center bg-purple-50 rounded-full mx-auto mb-6">
+              <Zap className="w-10 h-10 text-purple-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-slate-900 mb-3">AI Contract Creator</h2>
+            <p className="text-slate-600">Describe the contract you need and let AI generate it for you</p>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Describe Your Needs</label>
-            <textarea
-              rows={6}
-              className="input-field resize-none"
-              placeholder="Example: I need an employment contract for a senior software engineer position with a $120,000 salary, remote work option, and 3 weeks vacation..."
-            ></textarea>
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Contract Type</label>
+              <select value={contractType} onChange={(e) => setContractType(e.target.value)} className="input-field">
+                <option>Employment Contract</option>
+                <option>NDA</option>
+                <option>Service Agreement</option>
+                <option>Freelance Contract</option>
+                <option>Lease Agreement</option>
+                <option>Custom</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Describe Your Needs</label>
+              <textarea
+                rows={6}
+                className="input-field resize-none"
+                placeholder="Example: I need an employment contract for a senior software engineer position with a $120,000 salary, remote work option, and 3 weeks vacation..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              ></textarea>
+            </div>
+
+            {error && <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg">{error}</p>}
+
+            <button 
+              onClick={handleGenerateContract} 
+              disabled={isGenerating}
+              className="btn-primary w-full flex-center space-x-2 disabled:bg-slate-400 disabled:cursor-not-allowed"
+            >
+              {isGenerating ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Generating...</span>
+                </>
+              ) : (
+                <>
+                  <Zap className="w-5 h-5" />
+                  <span>Generate Contract with AI</span>
+                </>
+              )}
+            </button>
           </div>
 
-          <button 
-            onClick={() => alert('Generating AI Contract... (This is a placeholder)')} 
-            className="btn-primary w-full flex-center space-x-2"
-          >
-            <Zap className="w-5 h-5" />
-            <span>Generate Contract with AI</span>
-          </button>
+          {generatedContract && (
+            <div className="mt-8 pt-6 border-t border-slate-200">
+              <h3 className="text-xl font-semibold text-slate-900 mb-4">Generated Contract</h3>
+              <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <pre className="whitespace-pre-wrap text-sm text-slate-700 font-sans">{generatedContract}</pre>
+              </div>
+              <button 
+                onClick={handleSaveContract}
+                disabled={isSaving}
+                className="btn-secondary mt-4 w-full md:w-auto flex-center disabled:bg-slate-200 disabled:cursor-not-allowed"
+              >
+                {isSaving ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    <span>Saving...</span>
+                  </>
+                ) : (
+                  "Save and Edit"
+                )}
+              </button>
+            </div>
+          )}
         </div>
       </div>
-    </div>
-  );
+    );
+  };
   // Settings View (Placeholder)
   const SettingsView = () => (
     <div className="card p-12">
@@ -602,7 +788,7 @@ export default function DashboardPage({ user }) { // Accept the user prop
   // Main Render
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Overlay for mobile */}
+      {/* Overlay for mobile - keep it to close the sidebar */}
       {sidebarOpen && (
         <div 
           onClick={() => setSidebarOpen(false)}
@@ -613,7 +799,7 @@ export default function DashboardPage({ user }) { // Accept the user prop
       <Sidebar user={user} sidebarOpen={sidebarOpen} />
       <TopNav sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} handleShowNotifications={handleShowNotifications} />
       
-      <main className={`pt-24 pb-8 px-6 transition-all duration-300 ${sidebarOpen ? 'md:ml-64' : 'ml-0'}`}>
+      <main className={`dashboard-main ${!sidebarOpen && 'collapsed'}`}>
         <div className="max-w-7xl mx-auto">
           {currentView === 'dashboard' && <DashboardView />}
           {currentView === 'upload' && <UploadView />}
