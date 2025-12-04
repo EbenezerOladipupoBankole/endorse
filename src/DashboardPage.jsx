@@ -3,13 +3,13 @@ import {
   CheckCircle, FileText, Upload, Clock, CheckSquare, 
   Search, Filter, Plus, MoreVertical, Download, 
   Trash2, Eye, Send, Folder, Bell, Settings, 
-  LogOut, User, Menu, X, TrendingUp, Users, 
+  LogOut, User, Menu, X, TrendingUp, Users, Check,
   FileSignature, Zap, ChevronRight, Calendar
-} from 'lucide-react';
+} from 'lucide-react'; 
 import { signOut } from "firebase/auth";
 import { auth, db } from './firebase'; // Import db
-import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, deleteDoc } from "firebase/firestore"; // Import firestore functions
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, deleteDoc, updateDoc, arrayUnion } from "firebase/firestore"; // Import firestore functions
+import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"; 
 
 export default function DashboardPage({ user }) { // Accept the user prop
   const [currentView, setCurrentView] = useState('dashboard');
@@ -321,8 +321,8 @@ export default function DashboardPage({ user }) { // Accept the user prop
                   key={doc.id} 
                   className="hover:bg-slate-50 transition cursor-pointer"
                   onClick={() => {
-                    // Dispatch a custom event to navigate
-                    window.dispatchEvent(new CustomEvent('navigate', { detail: 'editor' }));
+                    setSelectedDoc(doc);
+                    handleViewChange('editor');
                   }}
                 >
                   <td className="px-6 py-4">
@@ -344,12 +344,12 @@ export default function DashboardPage({ user }) { // Accept the user prop
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm text-slate-900">
-                      {doc.signedBy} of {doc.signers} signed
+                      {doc.signedBy || 0} of {doc.signers ? doc.signers.length : 0} signed
                     </div>
                     <div className="w-full bg-slate-200 rounded-full h-1.5 mt-1">
                       <div 
                         className="bg-emerald-600 h-1.5 rounded-full" 
-                        style={{ width: `${(doc.signedBy / doc.signers) * 100}%` }}
+                        style={{ width: `${doc.signers && doc.signers.length > 0 ? (doc.signedBy / doc.signers.length) * 100 : 0}%` }}
                       ></div>
                     </div>
                   </td>
@@ -543,9 +543,11 @@ export default function DashboardPage({ user }) { // Accept the user prop
                 url: downloadURL,
                 size: `${(file.size / 1024).toFixed(2)} KB`,
                 type: 'PDF',
-                status: 'draft', // Default status
-                signers: 1, // Default value
-                signedBy: 0, // Default value
+                status: 'draft',
+                // Initialize signers as an array with the uploader as the first signer
+                signers: [{ email: user.email, status: 'signed' }],
+                // signedBy can be derived from the signers array length
+                signedBy: 1, 
                 date: serverTimestamp(), // Use server timestamp
               });
               // Success! Go back to the dashboard
@@ -660,23 +662,26 @@ This is a remote position. The Individual is expected to be available during sta
       setError('');
 
       try {
-        // Create a new document in the 'documents' collection
-        const docRef = await addDoc(collection(db, "documents"), {
+        const docData = {
           userId: user.uid,
           name: contractType,
           content: generatedContract, // Storing the text content
           size: `${(generatedContract.length / 1024).toFixed(2)} KB`,
           type: 'AI Generated',
           status: 'draft',
-          signers: 1,
+          // Initialize signers array with the creator as the first signer
+          signers: [{ email: user.email, status: 'pending' }],
           signedBy: 0,
           date: serverTimestamp(),
-        });
+        };
+        // Create a new document in the 'documents' collection
+        const docRef = await addDoc(collection(db, "documents"), docData);
 
         // After saving, navigate to the editor view for the new document.
         // This simulates opening the document to sign it.
-        window.dispatchEvent(new CustomEvent('navigate', { detail: 'editor' }));
-
+        const newDoc = { id: docRef.id, ...docData };
+        setSelectedDoc(newDoc);
+        handleViewChange('editor');
       } catch (e) {
         console.error("Error saving document: ", e);
         setError("Failed to save the contract. Please try again.");
@@ -805,6 +810,7 @@ This is a remote position. The Individual is expected to be available during sta
           {currentView === 'upload' && <UploadView />}
           {currentView === 'ai-contract' && <AIContractView />}
           {currentView === 'settings' && <SettingsView />}
+          {currentView === 'editor' && <DocumentEditorView document={selectedDoc} />}
         </div>
       </main>
     </div>
