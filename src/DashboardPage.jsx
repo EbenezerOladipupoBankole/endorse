@@ -7,9 +7,8 @@ import {
   FileSignature, Zap, ChevronRight, Calendar
 } from 'lucide-react'; 
 import { signOut } from "firebase/auth";
-import { auth, db } from './firebase'; // Import db
-import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, deleteDoc, updateDoc, arrayUnion } from "firebase/firestore"; // Import firestore functions
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"; 
+import { auth, db } from './firebase';
+import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, deleteDoc, updateDoc, arrayUnion } from "firebase/firestore";
 
 export default function DashboardPage({ user }) { // Accept the user prop
   const [currentView, setCurrentView] = useState('dashboard');
@@ -509,57 +508,58 @@ export default function DashboardPage({ user }) { // Accept the user prop
       uploadFile(file);
     };
  
-    const uploadFile = (file) => {
+    const uploadFile = async (file) => {
       if (!user) {
         setError("You must be logged in to upload a file.");
         return;
       }
  
+      // --- Cloudinary Configuration ---
+      // IMPORTANT: Replace these with your actual Cloudinary details
+      const cloudName = 'YOUR_CLOUD_NAME';
+      const uploadPreset = 'YOUR_UPLOAD_PRESET';
+      const url = `https://api.cloudinary.com/v1_1/${cloudName}/upload`;
+
       setIsUploading(true);
       setError('');
-      setUploadProgress(0);
- 
-      const storage = getStorage();
-      const storageRef = ref(storage, `documents/${user.uid}/${Date.now()}-${file.name}`);
-      const uploadTask = uploadBytesResumable(storageRef, file);
- 
-      uploadTask.on('state_changed',
-        (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          setUploadProgress(progress);
-        },
-        (error) => {
-          console.error("Upload failed:", error);
-          setError('An error occurred during upload. Please try again.');
-          setIsUploading(false);
-        },
-        () => {
-          getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
-            // File uploaded, now create Firestore document
-            try {
-              await addDoc(collection(db, "documents"), {
-                userId: user.uid,
-                name: file.name,
-                url: downloadURL,
-                size: `${(file.size / 1024).toFixed(2)} KB`,
-                type: 'PDF',
-                status: 'draft',
-                // Initialize signers as an array with the uploader as the first signer
-                signers: [{ email: user.email, status: 'signed' }],
-                // signedBy can be derived from the signers array length
-                signedBy: 1, 
-                date: serverTimestamp(), // Use server timestamp
-              });
-              // Success! Go back to the dashboard
-              handleViewChange('dashboard');
-            } catch (e) {
-              console.error("Error adding document to Firestore: ", e);
-              setError('Failed to save the document after upload.');
-              setIsUploading(false);
-            }
-          });
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', uploadPreset);
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error('Cloudinary upload failed.');
         }
-      );
+
+        const data = await response.json();
+        const downloadURL = data.secure_url;
+
+        // File uploaded to Cloudinary, now create Firestore document
+        await addDoc(collection(db, "documents"), {
+          userId: user.uid,
+          name: file.name,
+          url: downloadURL,
+          size: `${(file.size / 1024).toFixed(2)} KB`,
+          type: 'PDF',
+          status: 'draft',
+          signers: [{ email: user.email, status: 'signed' }],
+          signedBy: 1,
+          date: serverTimestamp(),
+        });
+
+        // Success! Go back to the dashboard
+        handleViewChange('dashboard');
+      } catch (err) {
+        console.error("Upload or save process failed:", err);
+        setError('An error occurred during upload. Please check your configuration and try again.');
+        setIsUploading(false);
+      }
     };
  
     return (
@@ -583,10 +583,7 @@ export default function DashboardPage({ user }) { // Accept the user prop
             <>
               <h2 className="text-2xl font-bold text-slate-900 mb-3">Uploading...</h2>
               <p className="text-slate-600 mb-8">Please wait while your document is being uploaded.</p>
-              <div className="w-full bg-slate-200 rounded-full h-2.5">
-                <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${uploadProgress}%` }}></div>
-              </div>
-              <p className="text-sm font-medium text-slate-700 mt-2">{Math.round(uploadProgress)}%</p>
+              <svg className="animate-spin h-8 w-8 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
             </>
           )}
         </div>
