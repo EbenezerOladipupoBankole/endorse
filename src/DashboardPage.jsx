@@ -4,14 +4,26 @@ import {
   Search, Filter, Plus, MoreVertical, Download, 
   Trash2, Eye, Send, Folder, Bell, Settings, 
   LogOut, User, Menu, X, TrendingUp, Users, Check,
-  FileSignature, Zap, ChevronRight, Calendar
+  FileSignature, Zap, ChevronRight, Calendar,
+  FileText as FileTextIcon // Renamed to avoid conflict with FileText from lucide-react
 } from 'lucide-react'; 
 import { signOut } from "firebase/auth";
 import { auth, db } from './firebase';
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, deleteDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
+
+// Configure the PDF.js worker source for Vite. This is a required step for react-pdf.
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.js',
+  import.meta.url,
+).toString();
+import FileUpload from './FileUpload';
 
 export default function DashboardPage({ user }) { // Accept the user prop
   const [currentView, setCurrentView] = useState('dashboard');
+  const [uploadSuccess, setUploadSuccess] = useState(false); // New state for upload success
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -21,7 +33,7 @@ export default function DashboardPage({ user }) { // Accept the user prop
 
   // NOTE: In a real application, these would also be fetched from your backend.
   // For now, they are placeholders.
-  const stats = [
+  const stats = [ // Renamed FileText to FileTextIcon to avoid conflict
     { label: "Documents This Month", value: "0", change: "", icon: <FileText className="w-6 h-6" />, color: "emerald" },
     { label: "Pending Signatures", value: "0", change: "", icon: <Clock className="w-6 h-6" />, color: "amber" },
     { label: "Completed", value: "0", change: "", icon: <CheckSquare className="w-6 h-6" />, color: "blue" },
@@ -115,7 +127,7 @@ export default function DashboardPage({ user }) { // Accept the user prop
           <button 
             onClick={() => handleViewChange('dashboard')}
             className={`sidebar-btn ${currentView === 'dashboard' ? 'sidebar-btn-active' : 'sidebar-btn-inactive'}`}
-          >
+          > 
             <FileText className="w-5 h-5 mr-3" />
             <span>Dashboard</span>
           </button>
@@ -123,7 +135,7 @@ export default function DashboardPage({ user }) { // Accept the user prop
           <button 
             onClick={() => handleViewChange('upload')}
             className={`sidebar-btn ${currentView === 'upload' ? 'sidebar-btn-active' : 'sidebar-btn-inactive'}`}
-          >
+          > 
             <Upload className="w-5 h-5 mr-3" />
             <span>Upload Document</span>
           </button>
@@ -481,115 +493,34 @@ export default function DashboardPage({ user }) { // Accept the user prop
     </div>
   );
   // Upload View (Placeholder)
-  const UploadView = () => {
-    const fileInputRef = useRef(null);
-    const [isUploading, setIsUploading] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState(0);
-    const [error, setError] = useState('');
- 
-    const handleChooseFile = () => {
-      fileInputRef.current.click();
-    };
- 
-    const handleFileChange = (event) => {
-      const file = event.target.files[0];
-      if (!file) return;
- 
-      // Basic validation
-      if (file.type !== 'application/pdf') {
-        setError('Only PDF files are supported.');
-        return;
-      }
-      if (file.size > 10 * 1024 * 1024) { // 10MB
-        setError('File size cannot exceed 10MB.');
-        return;
-      }
- 
-      uploadFile(file);
-    };
- 
-    const uploadFile = async (file) => {
-      if (!user) {
-        setError("You must be logged in to upload a file.");
-        return;
-      }
- 
-      // --- Cloudinary Configuration ---
-      // IMPORTANT: Replace these with your actual Cloudinary details
-      const cloudName = 'YOUR_CLOUD_NAME';
-      const uploadPreset = 'YOUR_UPLOAD_PRESET';
-      const url = `https://api.cloudinary.com/v1_1/${cloudName}/upload`;
-
-      setIsUploading(true);
-      setError('');
-
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', uploadPreset);
-
-      try {
-        const response = await fetch(url, {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!response.ok) {
-          throw new Error('Cloudinary upload failed.');
-        }
-
-        const data = await response.json();
-        const downloadURL = data.secure_url;
-
-        // File uploaded to Cloudinary, now create Firestore document
-        await addDoc(collection(db, "documents"), {
-          userId: user.uid,
-          name: file.name,
-          url: downloadURL,
-          size: `${(file.size / 1024).toFixed(2)} KB`,
-          type: 'PDF',
-          status: 'draft',
-          signers: [{ email: user.email, status: 'signed' }],
-          signedBy: 1,
-          date: serverTimestamp(),
-        });
-
-        // Success! Go back to the dashboard
-        handleViewChange('dashboard');
-      } catch (err) {
-        console.error("Upload or save process failed:", err);
-        setError('An error occurred during upload. Please check your configuration and try again.');
-        setIsUploading(false);
-      }
-    };
- 
+  // Import the FileUpload component
+  const FileUploadComponent = ({ onUploadSuccess }) => {
     return (
       <div className="card p-12">
         <div className="max-w-2xl mx-auto text-center">
           <div className="w-20 h-20 flex-center bg-blue-50 rounded-full mx-auto mb-6">
             <Upload className="w-10 h-10 text-blue-600" />
           </div>
-          {!isUploading ? (
+          {uploadSuccess ? (
             <>
-              <h2 className="text-2xl font-bold text-slate-900 mb-3">Upload Document</h2>
-              <p className="text-slate-600 mb-8">Drag and drop your PDF file here, or click to browse</p>
-              <button onClick={handleChooseFile} className="btn-primary">
-                Choose File
-              </button>
-              <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf" />
-              {error && <p className="text-sm text-red-600 mt-4">{error}</p>}
-              <p className="text-sm text-slate-500 mt-4">Supported formats: PDF (Max 10MB)</p>
+              <h2 className="text-2xl font-bold text-slate-900 mb-3">Upload Complete!</h2>
+              <p className="text-slate-600 mb-8">Your document has been successfully uploaded.</p>
+              <button onClick={() => onUploadSuccess()} className="btn-primary">Go to Dashboard</button>
             </>
           ) : (
             <>
               <h2 className="text-2xl font-bold text-slate-900 mb-3">Uploading...</h2>
               <p className="text-slate-600 mb-8">Please wait while your document is being uploaded.</p>
               <svg className="animate-spin h-8 w-8 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+              {/* The actual FileUpload component will be rendered here */}
+              <FileUpload onUploadSuccess={onUploadSuccess} user={user} />
             </>
           )}
         </div>
       </div>
     );
   };
+
   // AI Contract View (Placeholder)
   const AIContractView = () => {
     const [contractType, setContractType] = useState('Employment Contract');
@@ -787,6 +718,60 @@ This is a remote position. The Individual is expected to be available during sta
       </div>
     </div>
   );
+  // Document Editor View (Placeholder)
+  const DocumentEditorView = ({ document }) => {
+    const [numPages, setNumPages] = useState(null);
+    const [pageNumber, setPageNumber] = useState(1);
+
+    function onDocumentLoadSuccess({ numPages }) {
+      setNumPages(numPages);
+    }
+
+    const goToPrevPage = () => setPageNumber(prev => Math.max(prev - 1, 1));
+    const goToNextPage = () => setPageNumber(prev => Math.min(prev + 1, numPages));
+
+    if (!document) {
+      return (
+        <div className="card p-12 text-center">
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">No Document Selected</h2>
+          <p className="text-slate-600">Please go back to the dashboard and select a document to view.</p>
+          <button onClick={() => handleViewChange('dashboard')} className="btn-primary mt-6">
+            Back to Dashboard
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="card p-4 md:p-8">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-slate-900 mb-2 md:mb-0">Now Viewing: {document.name}</h2>
+          <div className="flex items-center space-x-4">
+            <p className="text-sm text-slate-600">
+              Page {pageNumber} of {numPages || '--'}
+            </p>
+            <div className="flex items-center space-x-2">
+              <button onClick={goToPrevPage} disabled={pageNumber <= 1} className="btn-secondary p-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                &lt; Prev
+              </button>
+              <button onClick={goToNextPage} disabled={pageNumber >= numPages} className="btn-secondary p-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                Next &gt;
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="pdf-container bg-slate-100 p-4 rounded-lg border border-slate-200 overflow-auto">
+          <Document
+            file={`${import.meta.env.VITE_BACKEND_URL}/api/get-pdf?url=${encodeURIComponent(document.url)}`}
+            onLoadSuccess={onDocumentLoadSuccess}
+          >
+            <Page pageNumber={pageNumber} />
+          </Document>
+        </div>
+      </div>
+    );
+  };
   // Main Render
   return (
     <div className="min-h-screen bg-slate-50">
@@ -804,7 +789,22 @@ This is a remote position. The Individual is expected to be available during sta
       <main className={`dashboard-main ${!sidebarOpen && 'collapsed'}`}>
         <div className="max-w-7xl mx-auto">
           {currentView === 'dashboard' && <DashboardView />}
-          {currentView === 'upload' && <UploadView />}
+          {currentView === 'upload' && (
+            <div className="card p-12">
+              <div className="max-w-2xl mx-auto text-center">
+                <div className="w-20 h-20 flex-center bg-blue-50 rounded-full mx-auto mb-6">
+                  <Upload className="w-10 h-10 text-blue-600" />
+                </div>
+                <FileUpload 
+                  user={user} 
+                  onUploadSuccess={(newDoc) => {
+                    setSelectedDoc(newDoc);
+                    handleViewChange('editor');
+                  }} 
+                />
+              </div>
+            </div>
+          )}
           {currentView === 'ai-contract' && <AIContractView />}
           {currentView === 'settings' && <SettingsView />}
           {currentView === 'editor' && <DocumentEditorView document={selectedDoc} />}
