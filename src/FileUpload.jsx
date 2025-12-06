@@ -142,7 +142,12 @@ const FileUpload = ({ user, onUploadSuccess }) => {
 
         } catch (error) {
             console.error('Upload error:', error);
-            setUploadStatus(`Error: ${error.message}`);
+            // Provide a more helpful error message for network errors
+            if (error instanceof TypeError && error.message === 'Failed to fetch') {
+                setUploadStatus('Error: Cannot connect to the server. Please ensure the backend is running and try again.');
+            } else {
+                setUploadStatus(`Error: ${error.message}`);
+            }
             setUploadProgress(0);
         } finally {
             setIsUploading(false);

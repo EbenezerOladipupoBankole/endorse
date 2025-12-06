@@ -10,15 +10,12 @@ import {
 import { signOut } from "firebase/auth";
 import { auth, db } from './firebase';
 import { collection, query, where, onSnapshot, addDoc, serverTimestamp, doc, deleteDoc, updateDoc, arrayUnion } from "firebase/firestore";
-import { Document, Page, pdfjs } from 'react-pdf';
+import { Document, Page, pdfjs } from 'react-pdf'; // Ensure pdfjs is imported
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
-// Configure the PDF.js worker source for Vite. This is a required step for react-pdf.
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.js',
-  import.meta.url,
-).toString();
+// Configure the PDF.js worker from a reliable CDN (jsdelivr) to avoid CORS and build issues.
+pdfjs.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 import FileUpload from './FileUpload';
 
 export default function DashboardPage({ user }) { // Accept the user prop

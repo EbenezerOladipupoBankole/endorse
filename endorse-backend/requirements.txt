@@ -1,0 +1,6 @@
+# c:\Users\HomePC\endorse\endorse-backend\requirements.txt
+fastapi
+uvicorn[standard]
+cloudinary
+python-dotenv
+requests

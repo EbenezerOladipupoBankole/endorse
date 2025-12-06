@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, FileText, Users, Zap, Shield, Clock, ChevronRight, Menu, X, Check, Star, UploadCloud, PenTool, Send, Plus, ArrowUp, MessageSquare, Twitter, Linkedin, Instagram, ChevronDown } from 'lucide-react';
-import endorseLogo from './assets/endorse.webp'; // Import your logo
+import endorseLogo from './assets/endorse.webp'; // Import the logo directly
 
 export default function LandingPage() {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
@@ -184,10 +184,10 @@ export default function LandingPage() {
         <div className="hero-trusted-by">
           <p>Trusted by teams at:</p>
           <div className="hero-trusted-logos">
-            <img src="https://via.placeholder.com/100x30?text=Innovate" alt="Innovate Inc." />
-            <img src="https://via.placeholder.com/100x30?text=Quantum" alt="Quantum Corp" />
-            <img src="https://via.placeholder.com/100x30?text=Apex" alt="Apex Solutions" />
-            <img src="https://via.placeholder.com/100x30?text=Stellar" alt="Stellar Co." />
+            <img src="https://placehold.co/100x30?text=Innovate" alt="Innovate Inc." />
+            <img src="https://placehold.co/100x30?text=Quantum" alt="Quantum Corp" />
+            <img src="https://placehold.co/100x30?text=Apex" alt="Apex Solutions" />
+            <img src="https://placehold.co/100x30?text=Stellar" alt="Stellar Co." />
           </div>
         </div>
       </div>
@@ -234,11 +234,11 @@ export default function LandingPage() {
         </h3>
         <div className="social-proof-logos">
           {/* Replace with your actual partner logos */}
-          <img src="https://via.placeholder.com/120x40?text=Logo1" alt="Company Logo 1" />
-          <img src="https://via.placeholder.com/120x40?text=Logo2" alt="Company Logo 2" />
-          <img src="https://via.placeholder.com/120x40?text=Logo3" alt="Company Logo 3" />
-          <img src="https://via.placeholder.com/120x40?text=Logo4" alt="Company Logo 4" />
-          <img src="https://via.placeholder.com/120x40?text=Logo5" alt="Company Logo 5" />
+          <img src="https://placehold.co/120x40?text=Logo1" alt="Company Logo 1" />
+          <img src="https://placehold.co/120x40?text=Logo2" alt="Company Logo 2" />
+          <img src="https://placehold.co/120x40?text=Logo3" alt="Company Logo 3" />
+          <img src="https://placehold.co/120x40?text=Logo4" alt="Company Logo 4" />
+          <img src="https://placehold.co/120x40?text=Logo5" alt="Company Logo 5" />
         </div>
       </div>
     </section>
@@ -248,12 +248,12 @@ export default function LandingPage() {
   const FeaturesSection = () => {
     const [activeFeature, setActiveFeature] = useState(0);
     const features = [
-      { icon: <Zap />, title: "AI Contract Generation", description: "Describe your needs in plain English and let our AI draft a professional, legally-sound contract for you in seconds.", image: "https://via.placeholder.com/600x400/eff6ff/1d4ed8?text=AI+Drafting" },
-      { icon: <FileText />, title: "Smart Document Editor", description: "Easily place signature fields, text boxes, and date stamps. Our AI suggests placements to save you time.", image: "https://via.placeholder.com/600x400/fef2f2/b91c1c?text=Smart+Editor" },
-      { icon: <Users />, title: "Seamless Collaboration", description: "Invite multiple signers, set signing orders, and track progress in real-time with automated reminders.", image: "https://via.placeholder.com/600x400/f0fdf4/166534?text=Collaboration" },
-      { icon: <Shield />, title: "Bank-Grade Security", description: "Your documents are protected with AES-256 encryption and a complete, tamper-proof audit trail for legal compliance.", image: "https://via.placeholder.com/600x400/ecfdf5/059669?text=Secure+Vault" },
-      { icon: <Clock />, title: "Automated Workflows", description: "Set up templates and automated sequences to handle recurring documents, saving you hours of manual work.", image: "https://via.placeholder.com/600x400/fefce8/a16207?text=Automation" },
-      { icon: <CheckCircle />, title: "Legally Binding", description: "Endorse signatures are compliant with eIDAS, ESIGN, and UETA regulations, making them legally binding worldwide.", image: "https://via.placeholder.com/600x400/faf5ff/7e22ce?text=Legally+Binding" }
+      { icon: <Zap />, title: "AI Contract Generation", description: "Describe your needs in plain English and let our AI draft a professional, legally-sound contract for you in seconds.", image: "https://placehold.co/600x400/eff6ff/1d4ed8?text=AI+Drafting" },
+      { icon: <FileText />, title: "Smart Document Editor", description: "Easily place signature fields, text boxes, and date stamps. Our AI suggests placements to save you time.", image: "https://placehold.co/600x400/fef2f2/b91c1c?text=Smart+Editor" },
+      { icon: <Users />, title: "Seamless Collaboration", description: "Invite multiple signers, set signing orders, and track progress in real-time with automated reminders.", image: "https://placehold.co/600x400/f0fdf4/166534?text=Collaboration" },
+      { icon: <Shield />, title: "Bank-Grade Security", description: "Your documents are protected with AES-256 encryption and a complete, tamper-proof audit trail for legal compliance.", image: "https://placehold.co/600x400/ecfdf5/059669?text=Secure+Vault" },
+      { icon: <Clock />, title: "Automated Workflows", description: "Set up templates and automated sequences to handle recurring documents, saving you hours of manual work.", image: "https://placehold.co/600x400/fefce8/a16207?text=Automation" },
+      { icon: <CheckCircle />, title: "Legally Binding", description: "Endorse signatures are compliant with eIDAS, ESIGN, and UETA regulations, making them legally binding worldwide.", image: "https://placehold.co/600x400/faf5ff/7e22ce?text=Legally+Binding" }
     ];
 
     return (
